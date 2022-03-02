@@ -3,7 +3,6 @@ import debug from 'electron-debug'
 import isDev from 'electron-is-dev'
 import fs from 'fs'
 import path from 'path'
-import url from 'url'
 import windowStateKeeper from 'electron-window-state'
 import fetch from 'node-fetch'
 import { getFileStream } from './generateFastaIndex'
@@ -95,9 +94,7 @@ autoUpdater.on('update-available', async () => {
 
 debug({ showDevTools: false })
 
-const devServerUrl = url.parse(
-  process.env.DEV_SERVER_URL || 'http://localhost:3000',
-)
+const devServerUrl = process.env.DEV_SERVER_URL || 'http://localhost:3000'
 
 const userData = app.getPath('userData')
 const recentSessionsPath = path.join(userData, 'recent_sessions.json')
@@ -207,7 +204,7 @@ async function createWindow() {
   mainWindowState.manage(mainWindow)
   mainWindow.loadURL(
     isDev
-      ? url.format(devServerUrl)
+      ? devServerUrl
       : `file://${path.join(app.getAppPath(), 'build', 'index.html')}`,
   )
   mainWindow.webContents.on('new-window', (event, outboundUrl) => {

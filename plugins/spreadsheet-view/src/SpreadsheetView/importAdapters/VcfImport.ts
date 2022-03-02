@@ -118,7 +118,7 @@ export function splitVcfFileHeaderAndBody(wholeFile: string) {
   }
 
   return {
-    header: wholeFile.substr(0, headerEndIndex),
-    body: wholeFile.substr(headerEndIndex),
+    header: wholeFile.slice(0, headerEndIndex),
+    body: wholeFile.slice(headerEndIndex),
   }
 }

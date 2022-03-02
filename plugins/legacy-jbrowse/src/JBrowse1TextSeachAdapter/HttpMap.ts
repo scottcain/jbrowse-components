@@ -81,7 +81,7 @@ export default class HttpMap {
       while (hex.length < 8) {
         hex = `0${hex}`
       }
-      hex = hex.substr(8 - hashHexCharacters)
+      hex = hex.slice(8 - hashHexCharacters)
       const dirpath = []
       for (let i = 0; i < hex.length; i += 3) {
         dirpath.push(hex.substring(i, i + 3))

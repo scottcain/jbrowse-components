@@ -15,9 +15,9 @@ export function featuresConsensusSequence(region, features) {
     const length = Math.min(str.length - offset, replacement.length - rOffset)
 
     return (
-      str.substr(0, offset) +
-      replacement.substr(rOffset, length) +
-      str.substr(offset + length)
+      str.slice(0, offset) +
+      replacement.slice(rOffset, rOffset + length) +
+      str.slice(offset + length)
     )
   }
 
