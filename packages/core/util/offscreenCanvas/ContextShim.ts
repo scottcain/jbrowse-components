@@ -1,13 +1,22 @@
-interface MethodCall {
+export interface MethodCall {
   type: string
   args: unknown[]
 }
 
 type SetterType = 'fillStyle' | 'strokeStyle' | 'font'
 
-interface SetterCall {
+export interface SetterCall {
   type: SetterType
   style: string
+}
+
+export type Call = MethodCall | SetterCall
+
+export function isMethodCall(call: Call): call is MethodCall {
+  return Boolean('args' in call)
+}
+export function isSetterCall(call: Call): call is SetterCall {
+  return Boolean('style' in call)
 }
 
 export default class OffscreenCanvasContextShim {
