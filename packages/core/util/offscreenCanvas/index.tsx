@@ -27,6 +27,9 @@ export async function renderToAbstractCanvas(
     const scale = 4
     const canvas = createCanvas(Math.ceil(width * scale), height * scale)
     const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      throw new Error('2d canvas rendering not supported on this platform')
+    }
     ctx.scale(scale, scale)
     await cb(ctx)
 
@@ -38,7 +41,7 @@ export async function renderToAbstractCanvas(
           width={width}
           height={height}
           xlinkHref={
-            canvas.convertToBlob
+            'convertToBlob' in canvas
               ? await blobToDataURL(
                   await canvas.convertToBlob({
                     type: 'image/png',
@@ -56,6 +59,9 @@ export async function renderToAbstractCanvas(
     height * highResolutionScaling,
   )
   const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    throw new Error('2d canvas rendering not supported on this platform')
+  }
   ctx.scale(highResolutionScaling, highResolutionScaling)
   await cb(ctx)
 

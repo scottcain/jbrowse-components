@@ -19,7 +19,7 @@ export function isSetterCall(call: Call): call is SetterCall {
   return Boolean('style' in call)
 }
 
-export default class OffscreenCanvasContextShim {
+export default class OffscreenCanvasRenderingContext2DShim {
   width: number
   height: number
 
@@ -35,7 +35,7 @@ export default class OffscreenCanvasContextShim {
     this.commands = []
   }
 
-  pushCommand(c: MethodCall) {
+  pushMethodCall(c: MethodCall) {
     this.commands.push(c)
   }
 
@@ -65,55 +65,55 @@ export default class OffscreenCanvasContextShim {
 
   // methods
   arc(...args: unknown[]) {
-    this.pushCommand({ type: 'arc', args })
+    this.pushMethodCall({ type: 'arc', args })
   }
 
   arcTo(...args: unknown[]) {
-    this.pushCommand({ type: 'arcTo', args })
+    this.pushMethodCall({ type: 'arcTo', args })
   }
 
   beginPath(...args: unknown[]) {
-    this.pushCommand({ type: 'beginPath', args })
+    this.pushMethodCall({ type: 'beginPath', args })
   }
 
   clearRect(...args: unknown[]) {
-    this.pushCommand({ type: 'clearRect', args })
+    this.pushMethodCall({ type: 'clearRect', args })
   }
 
   clip(...args: unknown[]) {
-    this.pushCommand({ type: 'clip', args })
+    this.pushMethodCall({ type: 'clip', args })
   }
 
   closePath(...args: unknown[]) {
-    this.pushCommand({ type: 'closePath', args })
+    this.pushMethodCall({ type: 'closePath', args })
   }
 
   createLinearGradient(...args: unknown[]) {
-    this.pushCommand({ type: 'createLinearGradient', args })
+    this.pushMethodCall({ type: 'createLinearGradient', args })
   }
 
   createPattern(...args: unknown[]) {
-    this.pushCommand({ type: 'createPattern', args })
+    this.pushMethodCall({ type: 'createPattern', args })
   }
 
   createRadialGradient(...args: unknown[]) {
-    this.pushCommand({ type: 'createRadialGradient', args })
+    this.pushMethodCall({ type: 'createRadialGradient', args })
   }
 
   drawFocusIfNeeded(...args: unknown[]) {
-    this.pushCommand({ type: 'drawFocusIfNeeded', args })
+    this.pushMethodCall({ type: 'drawFocusIfNeeded', args })
   }
 
   drawImage(...args: unknown[]) {
-    this.pushCommand({ type: 'drawImage', args })
+    this.pushMethodCall({ type: 'drawImage', args })
   }
 
   ellipse(...args: unknown[]) {
-    this.pushCommand({ type: 'ellipse', args })
+    this.pushMethodCall({ type: 'ellipse', args })
   }
 
   fill(...args: unknown[]) {
-    this.pushCommand({ type: 'fill', args })
+    this.pushMethodCall({ type: 'fill', args })
   }
 
   fillRect(...args: unknown[]) {
@@ -123,18 +123,18 @@ export default class OffscreenCanvasContextShim {
     }
     const nx = Math.max(x, 0)
     const nw = nx + w > this.width ? this.width - nx : w
-    this.pushCommand({ type: 'fillRect', args: [nx, y, nw, h] })
+    this.pushMethodCall({ type: 'fillRect', args: [nx, y, nw, h] })
   }
 
   fillText(...args: unknown[]) {
     // if (x > this.width || x + 1000 < 0) {
     //   return
     // }
-    this.pushCommand({ type: 'fillText', args })
+    this.pushMethodCall({ type: 'fillText', args })
   }
 
   lineTo(...args: unknown[]) {
-    this.pushCommand({ type: 'lineTo', args })
+    this.pushMethodCall({ type: 'lineTo', args })
   }
 
   measureText(text: string) {
@@ -146,58 +146,58 @@ export default class OffscreenCanvasContextShim {
   }
 
   moveTo(...args: unknown[]) {
-    this.pushCommand({ type: 'moveTo', args })
+    this.pushMethodCall({ type: 'moveTo', args })
   }
 
   quadraticCurveTo(...args: unknown[]) {
-    this.pushCommand({ type: 'quadraticCurveTo', args })
+    this.pushMethodCall({ type: 'quadraticCurveTo', args })
   }
 
   rect(...args: unknown[]) {
-    this.pushCommand({ type: 'rect', args })
+    this.pushMethodCall({ type: 'rect', args })
   }
 
   restore(...args: unknown[]) {
-    this.pushCommand({ type: 'restore', args })
+    this.pushMethodCall({ type: 'restore', args })
   }
 
   rotate(...args: unknown[]) {
-    this.pushCommand({ type: 'rotate', args })
+    this.pushMethodCall({ type: 'rotate', args })
   }
 
   save(...args: unknown[]) {
-    this.pushCommand({ type: 'save', args })
+    this.pushMethodCall({ type: 'save', args })
   }
 
   setLineDash(...args: unknown[]) {
-    this.pushCommand({ type: 'setLineDash', args })
+    this.pushMethodCall({ type: 'setLineDash', args })
   }
 
   setTransform(...args: unknown[]) {
-    this.pushCommand({ type: 'setTransform', args })
+    this.pushMethodCall({ type: 'setTransform', args })
   }
 
   scale(...args: unknown[]) {
-    this.pushCommand({ type: 'scale', args })
+    this.pushMethodCall({ type: 'scale', args })
   }
 
   stroke(...args: unknown[]) {
-    this.pushCommand({ type: 'stroke', args })
+    this.pushMethodCall({ type: 'stroke', args })
   }
 
   strokeRect(...args: unknown[]) {
-    this.pushCommand({ type: 'strokeRect', args })
+    this.pushMethodCall({ type: 'strokeRect', args })
   }
 
   strokeText(...args: unknown[]) {
-    this.pushCommand({ type: 'strokeText', args })
+    this.pushMethodCall({ type: 'strokeText', args })
   }
 
   transform(...args: unknown[]) {
-    this.pushCommand({ type: 'transform', args })
+    this.pushMethodCall({ type: 'transform', args })
   }
 
   translate(...args: unknown[]) {
-    this.pushCommand({ type: 'translate', args })
+    this.pushMethodCall({ type: 'translate', args })
   }
 }

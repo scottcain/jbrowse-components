@@ -1,10 +1,10 @@
 import React from 'react'
 import Color from 'color'
 import Path from 'svg-path-generator'
-import OffscreenCanvasContextShim, {
+import OffscreenCanvasRenderingContext2DShim, {
   isMethodCall,
   isSetterCall,
-} from './ContextShim'
+} from './Canvas2DContextShim'
 
 export function splitColor(color?: string) {
   const fill = Color(color)
@@ -83,19 +83,26 @@ export default class OffscreenCanvasShim {
   width: number
   height: number
 
-  context?: OffscreenCanvasContextShim
+  context: OffscreenCanvasRenderingContext2DShim
 
   constructor(width: number, height: number) {
     this.width = width
     this.height = height
+    this.context = new OffscreenCanvasRenderingContext2DShim(
+      this.width,
+      this.height,
+    )
   }
 
   getContext(type: '2d') {
     if (type !== '2d') {
       throw new Error(`unknown type ${type}`)
     }
-    this.context = new OffscreenCanvasContextShim(this.width, this.height)
     return this.context
+  }
+
+  toDataURL(): string {
+    throw new Error('not supported')
   }
 
   getSerializedSvg() {
