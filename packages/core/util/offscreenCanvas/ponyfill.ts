@@ -5,11 +5,16 @@
 import isNode from 'detect-node'
 import OffscreenCanvasShim from './CanvasShim'
 
-import type { AbstractCanvas, AbstractImageBitmap } from './types'
+import {
+  AbstractCanvas,
+  AbstractImageBitmap,
+  isCanvasImageDataShim,
+} from './types'
 import type {
   createCanvas as NodeCreateCanvas,
   Canvas as NodeCanvas,
 } from 'canvas'
+import { isMethodCall, isSetterCall } from './Canvas2DContextShim'
 
 export let createCanvas: (width: number, height: number) => AbstractCanvas
 export let createImageBitmap: (
@@ -19,8 +24,32 @@ export let createImageBitmap: (
 /** the JS class (constructor) for offscreen-generated image bitmap data */
 export let ImageBitmapType: Function
 
+export function drawImageOntoCanvasContext(
+  imageData: AbstractImageBitmap,
+  context: CanvasRenderingContext2D,
+) {
+  if (isCanvasImageDataShim(imageData)) {
+    imageData.commands.forEach(command => {
+      if (isSetterCall(command)) {
+        context[command.type] = command.style
+      } else if (isMethodCall(command)) {
+        // @ts-ignore
+        context[command.type](...command.args)
+      }
+    })
+  } else if (imageData instanceof ImageBitmapType) {
+    context.drawImage(imageData as CanvasImageSource, 0, 0)
+    // @ts-ignore
+  } else if (imageData.dataURL) {
+    throw new Error('dataURL deserialization no longer supported')
+    // const img = new Image()
+    // img.onload = () => context.drawImage(img, 0, 0)
+    // img.src = imageData.dataURL
+  }
+}
+
 const weHave = {
-  realOffscreenCanvas: typeof global.OffscreenCanvas === 'function',
+  realOffscreenCanvas: false, // typeof OffscreenCanvas === 'function',
   node: isNode,
 }
 
