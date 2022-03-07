@@ -28,15 +28,21 @@ export function drawImageOntoCanvasContext(
   imageData: AbstractImageBitmap,
   context: CanvasRenderingContext2D,
 ) {
+  console.log('draw', imageData, context)
   if (isCanvasImageDataShim(imageData)) {
-    imageData.commands.forEach(command => {
+    const commands = imageData.commands
+    const numCommands = commands.length
+    console.log(`drawing ${numCommands} commands`)
+    for (let i = 0; i < numCommands; i++) {
+      const command = commands[i]
       if (isSetterCall(command)) {
         context[command.type] = command.style
       } else if (isMethodCall(command)) {
         // @ts-ignore
-        context[command.type](...command.args)
+        // eslint-disable-next-line prefer-spread
+        context[command.type].apply(context, command.args)
       }
-    })
+    }
   } else if (imageData instanceof ImageBitmapType) {
     context.drawImage(imageData as CanvasImageSource, 0, 0)
     // @ts-ignore

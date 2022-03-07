@@ -1,5 +1,7 @@
 import OffscreenCanvasShim from './CanvasShim'
-import OffscreenCanvasRenderingContext2DShim, { Call } from './Canvas2DContextShim'
+import OffscreenCanvasRenderingContext2DShim, {
+  Call,
+} from './Canvas2DContextShim'
 import type * as NodeCanvas from 'canvas'
 import isObject from 'is-object'
 
