@@ -58,6 +58,26 @@ test('encode more commands, one without its optional arg', () => {
   ])
 })
 
+test('encode more commands, one without its optional arg', () => {
+  const b = Buffer.alloc(10000)
+  let offset = 0
+  offset = encodeCommand('fillRect', [1, 2, 3, 4], b, offset)
+  offset = encodeCommand('fillStyle', ['noggin'], b, offset)
+  offset = encodeCommand('fillRect', [6, 7, 8, 9], b, offset)
+  offset = encodeCommand('fillStyle', [], b, offset)
+  offset = encodeCommand('save', [], b, offset)
+  encodeCommand('fillRect', [-100, 200, -300, -400], b, offset)
+  const commands = Array.from(decodeCommands(b, 0))
+  expect(commands).toEqual([
+    { name: 'fillRect', args: [1, 2, 3, 4] },
+    { name: 'fillStyle', args: ['noggin'] },
+    { name: 'fillRect', args: [6, 7, 8, 9] },
+    { name: 'fillStyle', args: [] },
+    { name: 'save', args: [] },
+    { name: 'fillRect', args: [-100, 200, -300, -400] },
+  ])
+})
+
 test('encoding beyond end of buffer throws', () => {
   const b = Buffer.alloc(3)
   expect(() => encodeCommand('fillRect', [1, 2, 3, 4], b, 0)).toThrow('bounds')

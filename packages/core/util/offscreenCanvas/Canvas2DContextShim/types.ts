@@ -11,9 +11,15 @@ export enum CallSchemaField {
 }
 
 export const setterDataTypes = {
-  strokeStyle: CallSchemaField.STRING,
-  font: CallSchemaField.STRING,
-  fillStyle: CallSchemaField.STRING,
+  strokeStyle: [
+    CallSchemaField.FOLLOWING_ARGUMENTS_OPTIONAL,
+    CallSchemaField.STRING,
+  ],
+  font: [CallSchemaField.FOLLOWING_ARGUMENTS_OPTIONAL, CallSchemaField.STRING],
+  fillStyle: [
+    CallSchemaField.FOLLOWING_ARGUMENTS_OPTIONAL,
+    CallSchemaField.STRING,
+  ],
 }
 
 export const methodSignatures = {

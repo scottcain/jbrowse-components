@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { encodeCommand } from './command_codec'
-import { Call, MethodName, SetterName } from './types'
+import { decodeCommands, encodeCommand } from './command_codec'
+import { getSerializedSvg } from './svg'
+import { MethodName, SetterName } from './types'
 
 //* maximum anticipated size of a binary-serialized call
 const MAX_BINARY_CALL_SIZE = 1000
@@ -16,6 +17,15 @@ type RealRet<METHODNAME extends keyof OffscreenCanvasRenderingContext2D> =
   OffscreenCanvasRenderingContext2D[METHODNAME] extends (...arg0: any[]) => any
     ? ReturnType<OffscreenCanvasRenderingContext2D[METHODNAME]>
     : never
+
+/** get the type of the params of a method of the canvas shim */
+export type ShimP<
+  METHODNAME extends keyof OffscreenCanvasRenderingContext2DShim,
+> = OffscreenCanvasRenderingContext2DShim[METHODNAME] extends (
+  ...arg0: any[]
+) => any
+  ? Parameters<OffscreenCanvasRenderingContext2DShim[METHODNAME]>
+  : never
 
 export default class OffscreenCanvasRenderingContext2DShim {
   width: number
@@ -52,7 +62,7 @@ export default class OffscreenCanvasRenderingContext2DShim {
   }
 
   private pushMethodCall(name: MethodName, args: unknown[]) {
-    this.flushEncoder()
+    this.flushEncoderIfNeeded()
     this.currentCommandBufferOffset = encodeCommand(
       name,
       args,
@@ -62,7 +72,7 @@ export default class OffscreenCanvasRenderingContext2DShim {
   }
 
   private pushSetterCall(name: SetterName, arg: unknown) {
-    this.flushEncoder()
+    this.flushEncoderIfNeeded()
     this.currentCommandBufferOffset = encodeCommand(
       name,
       [arg],
@@ -71,8 +81,14 @@ export default class OffscreenCanvasRenderingContext2DShim {
     )
   }
 
-  forEachStoredCommand(callback: (c: Call, index: number) => void) {
+  getSerializedSVG() {
+    return getSerializedSvg(this)
+  }
+
+  getStoredCommands() {
     this.flushEncoder()
+    this.commandBuffers = [Buffer.concat(this.commandBuffers)]
+    return decodeCommands(this.commandBuffers[0])
   }
 
   // setters (no getters working)

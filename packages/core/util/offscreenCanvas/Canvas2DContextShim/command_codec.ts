@@ -33,7 +33,7 @@ function isStreamEnd(thing: unknown): thing is typeof END_STREAM {
 const commandArgSchemas: (CallSchemaField[] | typeof END_STREAM)[] = [
   END_STREAM,
   ...Object.values(methodSignatures),
-  ...Object.values(setterDataTypes).map(t => [t]),
+  ...Object.values(setterDataTypes),
 ]
 
 export function encodeCommand(
@@ -58,6 +58,7 @@ export function encodeCommand(
         offset = target.writeFloatLE(cmdArgs[argsI] as number, offset)
       } else if (type === CallSchemaField.STRING) {
         offset += target.write(cmdArgs[argsI] as string, offset, 'utf-8')
+        offset = target.writeUInt8(0, offset) // write a trailing zero for the string
       } else if (type === CallSchemaField.FOLLOWING_ARGUMENTS_OPTIONAL) {
         const numArgumentsRemaining = cmdArgs.length - schemaI + 1
         offset = target.writeUInt8(numArgumentsRemaining, offset)
