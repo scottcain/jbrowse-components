@@ -8,12 +8,14 @@ import OffscreenCanvasShim from './CanvasShim'
 import {
   AbstractCanvas,
   AbstractImageBitmap,
+  CanvasImageDataShim,
   isCanvasImageDataShim,
 } from './types'
 import type {
   createCanvas as NodeCreateCanvas,
   Canvas as NodeCanvas,
 } from 'canvas'
+import { replayCommandsOntoContext } from './Canvas2DContextShim/command_codec'
 
 export let createCanvas: (width: number, height: number) => AbstractCanvas
 export let createImageBitmap: (
@@ -28,21 +30,7 @@ export function drawImageOntoCanvasContext(
   context: CanvasRenderingContext2D,
 ) {
   if (isCanvasImageDataShim(imageData)) {
-    // const commands = deserializeCommands(imageData.commands)
-    // commands.on('data', command => {
-    //   console.log(command)
-    //   if (isSetterCall(command)) {
-    //     context[command.type] = command.style
-    //   } else if (isMethodCall(command)) {
-    //     // @ts-ignore
-    //     // eslint-disable-next-line prefer-spread
-    //     context[command.type].apply(context, command.args)
-    //   }
-    // })
-    // return new Promise((resolve, reject) => {
-    //   commands.on('close', resolve)
-    //   commands.on('error', reject)
-    // })
+    replayCommandsOntoContext(context, imageData.serializedCommands)
   } else if (imageData instanceof ImageBitmapType) {
     context.drawImage(imageData as CanvasImageSource, 0, 0)
     // @ts-ignore
@@ -89,7 +77,11 @@ if (weHave.realOffscreenCanvas) {
   }
   createImageBitmap = async canvas => {
     const ctx = (canvas as OffscreenCanvasShim).getContext('2d')
-    return ctx
+    return {
+      height: ctx.height,
+      width: ctx.width,
+      serializedCommands: ctx.getSerializedCommands(),
+    } as CanvasImageDataShim
   }
   ImageBitmapType = String
 }

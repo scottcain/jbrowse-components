@@ -1,7 +1,7 @@
 //* This file contains functions for encoding and decoding canvas setters and methods using a simple binary scheme */
 
 import {
-  Call,
+  Command,
   CallSchemaField,
   isMethodCall,
   MethodName,
@@ -104,6 +104,7 @@ export function encodeCommand(
   return offset
 }
 
+/** decode all the commands in the given buffer and replay them onto the given context */
 export function replayCommandsOntoContext(
   targetContext: CanvasRenderingContext2D,
   encodedCommands: Buffer,
@@ -135,7 +136,7 @@ export function* decodeCommands(encodedCommands: Buffer, startingOffset = 0) {
 export function decodeSingleCommand(
   encodedCommands: Buffer,
   startingOffset = 0,
-): [Call, number] | undefined {
+): [Command, number] | undefined {
   let offset = startingOffset
   const commandNumber = encodedCommands.readUInt8(offset)
   offset += 1

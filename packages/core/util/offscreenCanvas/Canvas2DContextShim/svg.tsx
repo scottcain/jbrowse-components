@@ -19,7 +19,7 @@ export function getSerializedSvg(ctx: Canvas2DContextShim) {
 
   const nodes: React.ReactElement[] = []
   let index = 0
-  for (const command of ctx.getStoredCommands()) {
+  for (const command of ctx.getCommands()) {
     if (isSetterCall(command)) {
       if (command.name === 'font') {
         if (command.args) {

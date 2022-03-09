@@ -44,17 +44,17 @@ export default class OffscreenCanvasRenderingContext2DShim {
     this.height = height
   }
 
-  private flushEncoderIfNeeded() {
+  private flushCommandEncoderIfNeeded() {
     // if we are nearly to the end of our current commands buffer, store it (with excess trimmed off) and make a new one
     if (
       this.currentCommandBufferOffset >
       this.currentCommandBuffer.length - MAX_BINARY_CALL_SIZE
     ) {
-      this.flushEncoder()
+      this.flushCommandEncoder()
     }
   }
 
-  private flushEncoder() {
+  private flushCommandEncoder() {
     this.commandBuffers.push(
       this.currentCommandBuffer.subarray(0, this.currentCommandBufferOffset),
     )
@@ -62,7 +62,7 @@ export default class OffscreenCanvasRenderingContext2DShim {
   }
 
   private pushMethodCall(name: MethodName, args: unknown[]) {
-    this.flushEncoderIfNeeded()
+    this.flushCommandEncoderIfNeeded()
     this.currentCommandBufferOffset = encodeCommand(
       name,
       args,
@@ -72,7 +72,7 @@ export default class OffscreenCanvasRenderingContext2DShim {
   }
 
   private pushSetterCall(name: SetterName, arg: unknown) {
-    this.flushEncoderIfNeeded()
+    this.flushCommandEncoderIfNeeded()
     this.currentCommandBufferOffset = encodeCommand(
       name,
       [arg],
@@ -81,14 +81,17 @@ export default class OffscreenCanvasRenderingContext2DShim {
     )
   }
 
+  getSerializedCommands() {
+    this.flushCommandEncoder()
+    return this.commandBuffers[0]
+  }
+
   getSerializedSvg() {
     return getSerializedSvg(this)
   }
 
-  getStoredCommands() {
-    this.flushEncoder()
-    this.commandBuffers = [Buffer.concat(this.commandBuffers)]
-    return decodeCommands(this.commandBuffers[0])
+  getCommands() {
+    return decodeCommands(this.getSerializedCommands())
   }
 
   // setters (no getters working)

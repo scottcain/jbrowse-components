@@ -1,4 +1,4 @@
-export interface Call {
+export interface Command {
   name: string
   args: unknown[]
 }
@@ -125,17 +125,17 @@ export const methodSignatures = {
 export type SetterName = keyof typeof setterDataTypes
 export type MethodName = keyof typeof methodSignatures
 
-export interface SetterCall extends Call {
+export interface SetterCall extends Command {
   name: SetterName
 }
 
-export interface MethodCall extends Call {
+export interface MethodCall extends Command {
   name: MethodName
 }
 
-export function isMethodCall(call: Call): call is MethodCall {
+export function isMethodCall(call: Command): call is MethodCall {
   return Boolean(call.name in methodSignatures)
 }
-export function isSetterCall(call: Call): call is SetterCall {
+export function isSetterCall(call: Command): call is SetterCall {
   return Boolean(call.name in setterDataTypes)
 }
