@@ -48,7 +48,7 @@ test('encode more commands, one without its optional arg', () => {
   offset = encodeCommand('fillRect', [1, 2, 3, 4], b, offset)
   offset = encodeCommand('arc', [5, 6, 7, 8], b, offset)
   offset = encodeCommand('save', [], b, offset)
-  offset = encodeCommand('fillRect', [-100, 200, -300, -400], b, offset)
+  encodeCommand('fillRect', [-100, 200, -300, -400], b, offset)
   const commands = Array.from(decodeCommands(b, 0))
   expect(commands).toEqual([
     { name: 'fillRect', args: [1, 2, 3, 4] },

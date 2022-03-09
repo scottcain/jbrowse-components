@@ -91,6 +91,7 @@ export const methodSignatures = {
     CallSchemaField.FLOAT,
   ],
   scale: [CallSchemaField.FLOAT, CallSchemaField.FLOAT],
+  stroke: [],
   strokeRect: [
     CallSchemaField.FLOAT,
     CallSchemaField.FLOAT,

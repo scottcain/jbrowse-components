@@ -188,6 +188,11 @@ export default class OffscreenCanvasRenderingContext2DShim {
     this.pushMethodCall('scale', args)
   }
 
+  //* shim does not support passing a Path2D object */
+  stroke(): RealRet<'stroke'> {
+    this.pushMethodCall('stroke', [])
+  }
+
   strokeRect(...args: RealP<'strokeRect'>): RealRet<'strokeRect'> {
     this.pushMethodCall('strokeRect', args)
   }
