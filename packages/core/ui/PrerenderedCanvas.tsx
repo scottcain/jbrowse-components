@@ -36,7 +36,6 @@ function PrerenderedCanvas(props: {
     if (!context) {
       return
     }
-
     drawImageOntoCanvasContext(imageData, context)
   }, [imageData])
 

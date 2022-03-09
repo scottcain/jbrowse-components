@@ -14,7 +14,10 @@ import type {
   createCanvas as NodeCreateCanvas,
   Canvas as NodeCanvas,
 } from 'canvas'
-import { isMethodCall, isSetterCall } from './Canvas2DContextShim'
+import {
+  isMethodCall,
+  isSetterCall,
+} from './Canvas2DContextShim'
 
 export let createCanvas: (width: number, height: number) => AbstractCanvas
 export let createImageBitmap: (
@@ -28,21 +31,22 @@ export function drawImageOntoCanvasContext(
   imageData: AbstractImageBitmap,
   context: CanvasRenderingContext2D,
 ) {
-  console.log('draw', imageData, context)
   if (isCanvasImageDataShim(imageData)) {
-    const commands = imageData.commands
-    const numCommands = commands.length
-    console.log(`drawing ${numCommands} commands`)
-    for (let i = 0; i < numCommands; i++) {
-      const command = commands[i]
-      if (isSetterCall(command)) {
-        context[command.type] = command.style
-      } else if (isMethodCall(command)) {
-        // @ts-ignore
-        // eslint-disable-next-line prefer-spread
-        context[command.type].apply(context, command.args)
-      }
-    }
+    // const commands = deserializeCommands(imageData.commands)
+    // commands.on('data', command => {
+    //   console.log(command)
+    //   if (isSetterCall(command)) {
+    //     context[command.type] = command.style
+    //   } else if (isMethodCall(command)) {
+    //     // @ts-ignore
+    //     // eslint-disable-next-line prefer-spread
+    //     context[command.type].apply(context, command.args)
+    //   }
+    // })
+    // return new Promise((resolve, reject) => {
+    //   commands.on('close', resolve)
+    //   commands.on('error', reject)
+    // })
   } else if (imageData instanceof ImageBitmapType) {
     context.drawImage(imageData as CanvasImageSource, 0, 0)
     // @ts-ignore
