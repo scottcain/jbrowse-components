@@ -81,7 +81,7 @@ export default class OffscreenCanvasRenderingContext2DShim {
     )
   }
 
-  getSerializedSVG() {
+  getSerializedSvg() {
     return getSerializedSvg(this)
   }
 
