@@ -14,10 +14,6 @@ import type {
   createCanvas as NodeCreateCanvas,
   Canvas as NodeCanvas,
 } from 'canvas'
-import {
-  isMethodCall,
-  isSetterCall,
-} from './Canvas2DContextShim'
 
 export let createCanvas: (width: number, height: number) => AbstractCanvas
 export let createImageBitmap: (

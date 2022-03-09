@@ -1,1 +1,3 @@
-export default './context'
+import ctx from './context'
+
+export default ctx

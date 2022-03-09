@@ -1,8 +1,21 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { encodeCommand } from './command_codec'
 import { Call, MethodName, SetterName } from './types'
 
 //* maximum anticipated size of a binary-serialized call
 const MAX_BINARY_CALL_SIZE = 1000
+
+/** get the params type of real method in OffscreenCanvasRenderingContext2D */
+type RealP<METHODNAME extends keyof OffscreenCanvasRenderingContext2D> =
+  OffscreenCanvasRenderingContext2D[METHODNAME] extends (...arg0: any[]) => any
+    ? Parameters<OffscreenCanvasRenderingContext2D[METHODNAME]>
+    : never
+
+/** get the return type of real method in OffscreenCanvasRenderingContext2D */
+type RealRet<METHODNAME extends keyof OffscreenCanvasRenderingContext2D> =
+  OffscreenCanvasRenderingContext2D[METHODNAME] extends (...arg0: any[]) => any
+    ? ReturnType<OffscreenCanvasRenderingContext2D[METHODNAME]>
+    : never
 
 export default class OffscreenCanvasRenderingContext2DShim {
   width: number
@@ -21,17 +34,21 @@ export default class OffscreenCanvasRenderingContext2DShim {
     this.height = height
   }
 
-  private flushEncoder() {
+  private flushEncoderIfNeeded() {
     // if we are nearly to the end of our current commands buffer, store it (with excess trimmed off) and make a new one
     if (
       this.currentCommandBufferOffset >
       this.currentCommandBuffer.length - MAX_BINARY_CALL_SIZE
     ) {
-      this.commandBuffers.push(
-        this.currentCommandBuffer.subarray(0, this.currentCommandBufferOffset),
-      )
-      this.currentCommandBufferOffset = 0
+      this.flushEncoder()
     }
+  }
+
+  private flushEncoder() {
+    this.commandBuffers.push(
+      this.currentCommandBuffer.subarray(0, this.currentCommandBufferOffset),
+    )
+    this.currentCommandBufferOffset = 0
   }
 
   private pushMethodCall(name: MethodName, args: unknown[]) {
@@ -79,35 +96,35 @@ export default class OffscreenCanvasRenderingContext2DShim {
   }
 
   // methods
-  arc(...args: unknown[]) {
+  arc(...args: RealP<'arc'>): RealRet<'arc'> {
     this.pushMethodCall('arc', args)
   }
 
-  arcTo(...args: unknown[]) {
+  arcTo(...args: RealP<'arcTo'>): RealRet<'arcTo'> {
     this.pushMethodCall('arcTo', args)
   }
 
-  beginPath(...args: unknown[]) {
+  beginPath(...args: RealP<'beginPath'>): RealRet<'beginPath'> {
     this.pushMethodCall('beginPath', args)
   }
 
-  clearRect(...args: unknown[]) {
+  clearRect(...args: RealP<'clearRect'>): RealRet<'clearRect'> {
     this.pushMethodCall('clearRect', args)
   }
 
-  closePath(...args: unknown[]) {
+  closePath(...args: RealP<'closePath'>): RealRet<'closePath'> {
     this.pushMethodCall('closePath', args)
   }
 
-  ellipse(...args: unknown[]) {
+  ellipse(...args: RealP<'ellipse'>): RealRet<'ellipse'> {
     this.pushMethodCall('ellipse', args)
   }
 
-  fill(...args: unknown[]) {
+  fill(...args: RealP<'fill'>): RealRet<'fill'> {
     this.pushMethodCall('fill', args)
   }
 
-  fillRect(...args: unknown[]) {
+  fillRect(...args: RealP<'fillRect'>): RealRet<'fillRect'> {
     const [x, y, w, h] = args as number[]
     if (x > this.width || x + w < 0) {
       return
@@ -117,18 +134,19 @@ export default class OffscreenCanvasRenderingContext2DShim {
     this.pushMethodCall('fillRect', [nx, y, nw, h])
   }
 
-  fillText(...args: unknown[]) {
+  fillText(...args: RealP<'fillText'>): RealRet<'fillText'> {
     // if (x > this.width || x + 1000 < 0) {
     //   return
     // }
     this.pushMethodCall('fillText', args)
   }
 
-  lineTo(...args: unknown[]) {
+  lineTo(...args: RealP<'lineTo'>): RealRet<'lineTo'> {
     this.pushMethodCall('lineTo', args)
   }
 
-  measureText(text: string) {
+  measureText(...args: RealP<'measureText'>) {
+    const [text] = args
     const height = Number((this.currentFont.match(/\d+/) || [])[0])
     return {
       width: (height / 2) * text.length,
@@ -136,51 +154,53 @@ export default class OffscreenCanvasRenderingContext2DShim {
     }
   }
 
-  moveTo(...args: unknown[]) {
+  moveTo(...args: RealP<'moveTo'>): RealRet<'moveTo'> {
     this.pushMethodCall('moveTo', args)
   }
 
-  quadraticCurveTo(...args: unknown[]) {
+  quadraticCurveTo(
+    ...args: RealP<'quadraticCurveTo'>
+  ): RealRet<'quadraticCurveTo'> {
     this.pushMethodCall('quadraticCurveTo', args)
   }
 
-  rect(...args: unknown[]) {
+  rect(...args: RealP<'rect'>): RealRet<'rect'> {
     this.pushMethodCall('rect', args)
   }
 
-  restore(...args: unknown[]) {
+  restore(...args: RealP<'restore'>): RealRet<'restore'> {
     this.pushMethodCall('restore', args)
   }
 
-  rotate(...args: unknown[]) {
+  rotate(...args: RealP<'rotate'>): RealRet<'rotate'> {
     this.pushMethodCall('rotate', args)
   }
 
-  save(...args: unknown[]) {
+  save(...args: RealP<'save'>): RealRet<'save'> {
     this.pushMethodCall('save', args)
   }
 
-  setTransform(...args: unknown[]) {
+  setTransform(...args: RealP<'setTransform'>): RealRet<'setTransform'> {
     this.pushMethodCall('setTransform', args)
   }
 
-  scale(...args: unknown[]) {
+  scale(...args: RealP<'scale'>): RealRet<'scale'> {
     this.pushMethodCall('scale', args)
   }
 
-  strokeRect(...args: unknown[]) {
+  strokeRect(...args: RealP<'strokeRect'>): RealRet<'strokeRect'> {
     this.pushMethodCall('strokeRect', args)
   }
 
-  strokeText(...args: unknown[]) {
+  strokeText(...args: RealP<'strokeText'>): RealRet<'strokeText'> {
     this.pushMethodCall('strokeText', args)
   }
 
-  transform(...args: unknown[]) {
+  transform(...args: RealP<'transform'>): RealRet<'transform'> {
     this.pushMethodCall('transform', args)
   }
 
-  translate(...args: unknown[]) {
+  translate(...args: RealP<'translate'>): RealRet<'translate'> {
     this.pushMethodCall('translate', args)
   }
 }
