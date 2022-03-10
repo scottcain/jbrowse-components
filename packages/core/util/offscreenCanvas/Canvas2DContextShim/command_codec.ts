@@ -5,6 +5,7 @@ import {
   CallSchemaField,
   Command,
   isMethodCall,
+  isSetterCall,
   MethodName,
   methodSignatures,
   setterDataTypes,
@@ -17,7 +18,11 @@ import {
  */
 export class DebuggingValidator {
   // colin please don't delete this code
-  commands: Command[] = []
+  commands: Command[]
+  constructor(c: Command[] = []) {
+    this.commands = c
+  }
+
   push(name: SetterName | MethodName, args: unknown[]) {
     this.commands.push({ name, args })
   }
@@ -40,7 +45,8 @@ export class DebuggingValidator {
         return false
       }
       if (at === 'number') {
-        if (Math.abs((a as number) - (a as number)) > 0.01) {
+        // if(a !== b) {
+        if (Math.abs((a as number) - (b as number)) > 0.01) {
           return false
         }
       } else if (a !== b) {
@@ -50,17 +56,33 @@ export class DebuggingValidator {
     return true
   }
 
-  validate(encodedCommands: Uint8Array) {
+  validateAgainst(encodedCommands: Uint8Array) {
     let debugCommandIndex = 0
+    console.log('validating ' + this.commands.length + ' commands')
     for (const encodedCommand of decodeCommands(encodedCommands)) {
       const debugCommand = this.commands[debugCommandIndex++]
       if (!this.commandsEqual(debugCommand, encodedCommand)) {
         console.error({ debugCommand, encodedCommand })
-        debugger
-        this.commandsEqual(debugCommand, encodedCommand)
-        throw new Error('command recording validation failed')
+        // debugger
+        // this.commandsEqual(debugCommand, encodedCommand)
+        throw new Error(
+          'command recording validation failed, a command differs beyond threshold',
+        )
       }
     }
+    if (debugCommandIndex < this.commands.length) {
+      throw new Error(
+        'command recording validation failed, validator recorded ' +
+          this.commands.length.toLocaleString() +
+          ' commands, but decoder only emitted ' +
+          (debugCommandIndex - 1).toLocaleString(),
+      )
+    }
+    console.log(
+      'command validation succeeded for ' +
+        this.commands.length.toLocaleString() +
+        ' commands',
+    )
   }
 }
 
@@ -165,15 +187,32 @@ export function replayCommandsOntoContext(
   encodedCommands: Uint8Array,
   startingOffset = 0,
 ) {
-  console.log(
-    'replaying ' +
-      encodedCommands.byteLength.toLocaleString() +
-      ' bytes of encoded canvas commands',
-  )
+  // console.log(
+  //   'replaying ' +
+  //     encodedCommands.byteLength.toLocaleString() +
+  //     ' bytes of encoded canvas commands',
+  // )
+
   let offset: number | undefined = startingOffset
   while (offset !== undefined && offset < encodedCommands.byteLength) {
     offset = replaySingleCommand(targetContext, encodedCommands, offset)
   }
+}
+
+export function replayDebugCommandsOntoContext(
+  targetContext: CanvasRenderingContext2D,
+  commands: Command[],
+) {
+  console.log('replaying ' + commands.length + ' debug commands')
+  commands.forEach(cmd => {
+    if (isMethodCall(cmd)) {
+      // @ts-ignore
+      targetContext[cmd.name](...cmd.args)
+    } else if (isSetterCall(cmd)) {
+      // @ts-ignore
+      targetContext[cmd.name] = cmd.args[0]
+    }
+  })
 }
 
 /** decode all the commands in the buffer, starting at the given offset */
@@ -182,7 +221,7 @@ export function* decodeCommands(
   startingOffset = 0,
 ) {
   let offset = startingOffset
-  while (offset < encodedCommands.byteLength) {
+  while (offset < encodedCommands.length) {
     const decode = decodeSingleCommand(encodedCommands, offset)
     if (!decode) {
       return

@@ -32,7 +32,24 @@ export type ShimP<
   ? Parameters<OffscreenCanvasRenderingContext2DShim[METHODNAME]>
   : never
 
-const DEBUG = true
+const DEBUG = false
+
+function concatArrayBuffers(views: ArrayBufferView[]) {
+  let length = 0
+  for (const v of views) {
+    length += v.byteLength
+  }
+
+  const buf = new Uint8Array(length)
+  let offset = 0
+  for (const v of views) {
+    const uint8view = new Uint8Array(v.buffer, v.byteOffset, v.byteLength)
+    buf.set(uint8view, offset)
+    offset += uint8view.byteLength
+  }
+
+  return buf
+}
 
 export default class OffscreenCanvasRenderingContext2DShim {
   width: number
@@ -99,8 +116,11 @@ export default class OffscreenCanvasRenderingContext2DShim {
 
   getSerializedCommands() {
     this.flushCommandEncoder()
+    if (this.commandBuffers.length > 1) {
+      this.commandBuffers = [concatArrayBuffers(this.commandBuffers)]
+    }
     if (DEBUG) {
-      this.debugValidator.validate(this.commandBuffers[0])
+      this.debugValidator.validateAgainst(this.commandBuffers[0])
     }
     return this.commandBuffers[0]
   }
