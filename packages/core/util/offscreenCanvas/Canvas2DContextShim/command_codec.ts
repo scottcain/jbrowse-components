@@ -1,16 +1,68 @@
 //* This file contains functions for encoding and decoding canvas setters and methods using a simple binary scheme */
 
 import { TextDecoder, TextEncoder } from 'web-encoding'
-
 import {
-  Command,
   CallSchemaField,
+  Command,
   isMethodCall,
   MethodName,
   methodSignatures,
   setterDataTypes,
   SetterName,
 } from './types'
+
+/**
+ * tiny class that just remembers commands and makes sure the encoding and decoding is lossless.
+ * only used during debugging.
+ */
+export class DebuggingValidator {
+  // colin please don't delete this code
+  commands: Command[] = []
+  push(name: SetterName | MethodName, args: unknown[]) {
+    this.commands.push({ name, args })
+  }
+
+  // need to do this because we have to fuzzy-compare floats
+  commandsEqual(ac: Command, bc: Command) {
+    if (ac.name !== bc.name) {
+      return false
+    }
+    if (ac.args.length !== bc.args.length) {
+      return false
+    }
+    const aArgs = ac.args
+    const bArgs = bc.args
+    for (let i = 0; i < aArgs.length; i++) {
+      const a = aArgs[i]
+      const at = typeof a
+      const b = bArgs[i]
+      if (at !== typeof b) {
+        return false
+      }
+      if (at === 'number') {
+        if (Math.abs((a as number) - (a as number)) > 0.01) {
+          return false
+        }
+      } else if (a !== b) {
+        return false
+      }
+    }
+    return true
+  }
+
+  validate(encodedCommands: Uint8Array) {
+    let debugCommandIndex = 0
+    for (const encodedCommand of decodeCommands(encodedCommands)) {
+      const debugCommand = this.commands[debugCommandIndex++]
+      if (!this.commandsEqual(debugCommand, encodedCommand)) {
+        console.error({ debugCommand, encodedCommand })
+        debugger
+        this.commandsEqual(debugCommand, encodedCommand)
+        throw new Error('command recording validation failed')
+      }
+    }
+  }
+}
 
 const END_STREAM: unique symbol = Symbol('command_stream_end')
 
@@ -113,6 +165,11 @@ export function replayCommandsOntoContext(
   encodedCommands: Uint8Array,
   startingOffset = 0,
 ) {
+  console.log(
+    'replaying ' +
+      encodedCommands.byteLength.toLocaleString() +
+      ' bytes of encoded canvas commands',
+  )
   let offset: number | undefined = startingOffset
   while (offset !== undefined && offset < encodedCommands.byteLength) {
     offset = replaySingleCommand(targetContext, encodedCommands, offset)

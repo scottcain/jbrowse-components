@@ -1,10 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { decodeCommands, encodeCommand } from './command_codec'
+import {
+  DebuggingValidator,
+  decodeCommands,
+  encodeCommand,
+} from './command_codec'
 import { getSerializedSvg } from './svg'
 import { MethodName, SetterName } from './types'
 
 //* maximum anticipated size of a binary-serialized call
-const MAX_BINARY_CALL_SIZE = 1000
+const MAX_BINARY_CALL_SIZE = 500
 const COMMAND_PAGE_SIZE = MAX_BINARY_CALL_SIZE * 5000
 
 /** get the params type of real method in OffscreenCanvasRenderingContext2D */
@@ -28,6 +32,8 @@ export type ShimP<
   ? Parameters<OffscreenCanvasRenderingContext2DShim[METHODNAME]>
   : never
 
+const DEBUG = true
+
 export default class OffscreenCanvasRenderingContext2DShim {
   width: number
   height: number
@@ -39,6 +45,8 @@ export default class OffscreenCanvasRenderingContext2DShim {
   currentCommandBuffer = new Uint8Array(COMMAND_PAGE_SIZE)
   currentCommandBufferOffset = 0
   commandBuffers: Uint8Array[] = []
+
+  debugValidator = new DebuggingValidator()
 
   constructor(width: number, height: number) {
     this.width = width
@@ -57,7 +65,7 @@ export default class OffscreenCanvasRenderingContext2DShim {
 
   private flushCommandEncoder() {
     this.commandBuffers.push(
-      this.currentCommandBuffer.slice(0, this.currentCommandBufferOffset),
+      this.currentCommandBuffer.subarray(0, this.currentCommandBufferOffset),
     )
     this.currentCommandBuffer = new Uint8Array(COMMAND_PAGE_SIZE)
     this.currentCommandBufferOffset = 0
@@ -71,6 +79,9 @@ export default class OffscreenCanvasRenderingContext2DShim {
       this.currentCommandBuffer,
       this.currentCommandBufferOffset,
     )
+    if (DEBUG) {
+      this.debugValidator.push(name, args)
+    }
   }
 
   private pushSetterCall(name: SetterName, arg: unknown) {
@@ -81,10 +92,16 @@ export default class OffscreenCanvasRenderingContext2DShim {
       this.currentCommandBuffer,
       this.currentCommandBufferOffset,
     )
+    if (DEBUG) {
+      this.debugValidator.push(name, [arg])
+    }
   }
 
   getSerializedCommands() {
     this.flushCommandEncoder()
+    if (DEBUG) {
+      this.debugValidator.validate(this.commandBuffers[0])
+    }
     return this.commandBuffers[0]
   }
 
@@ -146,7 +163,7 @@ export default class OffscreenCanvasRenderingContext2DShim {
   }
 
   fillRect(...args: RealP<'fillRect'>): RealRet<'fillRect'> {
-    const [x, y, w, h] = args as number[]
+    const [x, y, w, h] = args
     if (x > this.width || x + w < 0) {
       return
     }
