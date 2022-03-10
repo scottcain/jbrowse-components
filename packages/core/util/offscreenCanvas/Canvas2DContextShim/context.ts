@@ -5,6 +5,7 @@ import { MethodName, SetterName } from './types'
 
 //* maximum anticipated size of a binary-serialized call
 const MAX_BINARY_CALL_SIZE = 1000
+const COMMAND_PAGE_SIZE = MAX_BINARY_CALL_SIZE * 5000
 
 /** get the params type of real method in OffscreenCanvasRenderingContext2D */
 type RealP<METHODNAME extends keyof OffscreenCanvasRenderingContext2D> =
@@ -35,9 +36,9 @@ export default class OffscreenCanvasRenderingContext2DShim {
   currentStrokeStyle = ''
   currentFillStyle = ''
 
-  currentCommandBuffer = Buffer.allocUnsafe(MAX_BINARY_CALL_SIZE * 1000)
+  currentCommandBuffer = new Uint8Array(COMMAND_PAGE_SIZE)
   currentCommandBufferOffset = 0
-  commandBuffers: Buffer[] = []
+  commandBuffers: Uint8Array[] = []
 
   constructor(width: number, height: number) {
     this.width = width
@@ -48,7 +49,7 @@ export default class OffscreenCanvasRenderingContext2DShim {
     // if we are nearly to the end of our current commands buffer, store it (with excess trimmed off) and make a new one
     if (
       this.currentCommandBufferOffset >
-      this.currentCommandBuffer.length - MAX_BINARY_CALL_SIZE
+      this.currentCommandBuffer.byteLength - MAX_BINARY_CALL_SIZE
     ) {
       this.flushCommandEncoder()
     }
@@ -56,8 +57,9 @@ export default class OffscreenCanvasRenderingContext2DShim {
 
   private flushCommandEncoder() {
     this.commandBuffers.push(
-      this.currentCommandBuffer.subarray(0, this.currentCommandBufferOffset),
+      this.currentCommandBuffer.slice(0, this.currentCommandBufferOffset),
     )
+    this.currentCommandBuffer = new Uint8Array(COMMAND_PAGE_SIZE)
     this.currentCommandBufferOffset = 0
   }
 

@@ -43,10 +43,10 @@ export function drawImageOntoCanvasContext(
 }
 
 const weHave = {
-  realOffscreenCanvas: false, // typeof OffscreenCanvas === 'function',
+  realOffscreenCanvas: typeof OffscreenCanvas === 'function',
   node: isNode,
 }
-
+// weHave.realOffscreenCanvas = false
 if (weHave.realOffscreenCanvas) {
   createCanvas = (width, height) => new OffscreenCanvas(width, height)
   // @ts-ignore

@@ -28,6 +28,7 @@ export const methodSignatures = {
     CallSchemaField.FLOAT,
     CallSchemaField.FLOAT,
     CallSchemaField.FLOAT,
+    CallSchemaField.FLOAT,
     CallSchemaField.FOLLOWING_ARGUMENTS_OPTIONAL,
     CallSchemaField.BOOL,
   ],

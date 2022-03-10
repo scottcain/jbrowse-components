@@ -3,17 +3,18 @@ import {
   decodeSingleCommand,
   encodeCommand,
   readString,
+  writeString,
 } from './command_codec'
 
 test('readstring', () => {
-  const b = Buffer.alloc(100)
-  b.write('hello', 20)
+  const b = new Uint8Array(100)
+  writeString('hello', b, 20)
   const [str, newOffset] = readString(b, 20)
   expect(str).toEqual('hello')
   expect(newOffset).toBe(26)
-  b.write('hello', 0)
+  writeString('hello', b, 0)
   //       012345
-  b.write('bonjour', 6)
+  writeString('bonjour', b, 6)
   //       67890123
   const [str2, b1] = readString(b, 0)
   expect(str2).toBe('hello')
@@ -24,42 +25,42 @@ test('readstring', () => {
 })
 
 test('single encode and decode round trip', () => {
-  const b = Buffer.alloc(100)
+  const b = new Uint8Array(100)
   encodeCommand('fillRect', [1, 2, 3, 4], b, 0)
   const decode = decodeSingleCommand(b, 0)
   expect(decode).toEqual([{ name: 'fillRect', args: [1, 2, 3, 4] }, 17])
 })
 
 test('encode more commands, including optional args', () => {
-  const b = Buffer.alloc(10000)
+  const b = new Uint8Array(10000)
   let offset = 0
   offset = encodeCommand('fillRect', [1, 2, 3, 4], b, offset)
-  encodeCommand('arc', [1, 2, 3, 4, true], b, offset)
+  encodeCommand('arc', [1, 2, 3, 4, 5, true], b, offset)
   const commands = Array.from(decodeCommands(b, 0))
   expect(commands).toEqual([
     { name: 'fillRect', args: [1, 2, 3, 4] },
-    { name: 'arc', args: [1, 2, 3, 4, true] },
+    { name: 'arc', args: [1, 2, 3, 4, 5, true] },
   ])
 })
 
 test('encode more commands, one without its optional arg', () => {
-  const b = Buffer.alloc(10000)
+  const b = new Uint8Array(10000)
   let offset = 0
   offset = encodeCommand('fillRect', [1, 2, 3, 4], b, offset)
-  offset = encodeCommand('arc', [5, 6, 7, 8], b, offset)
+  offset = encodeCommand('arc', [5, 6, 7, 8, 9], b, offset)
   offset = encodeCommand('save', [], b, offset)
   encodeCommand('fillRect', [-100, 200, -300, -400], b, offset)
   const commands = Array.from(decodeCommands(b, 0))
   expect(commands).toEqual([
     { name: 'fillRect', args: [1, 2, 3, 4] },
-    { name: 'arc', args: [5, 6, 7, 8] },
+    { name: 'arc', args: [5, 6, 7, 8, 9] },
     { name: 'save', args: [] },
     { name: 'fillRect', args: [-100, 200, -300, -400] },
   ])
 })
 
-test('encode more commands, one without its optional arg', () => {
-  const b = Buffer.alloc(10000)
+test('encode more commands, including setters', () => {
+  const b = new Uint8Array(10000)
   let offset = 0
   offset = encodeCommand('fillRect', [1, 2, 3, 4], b, offset)
   offset = encodeCommand('fillStyle', ['noggin'], b, offset)
@@ -79,6 +80,6 @@ test('encode more commands, one without its optional arg', () => {
 })
 
 test('encoding beyond end of buffer throws', () => {
-  const b = Buffer.alloc(3)
+  const b = new Uint8Array(3)
   expect(() => encodeCommand('fillRect', [1, 2, 3, 4], b, 0)).toThrow('bounds')
 })

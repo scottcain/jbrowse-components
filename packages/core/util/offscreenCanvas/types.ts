@@ -16,7 +16,7 @@ export type AbstractImageBitmap = Pick<ImageBitmap, 'height' | 'width'>
 
 /** a plain-object (JSON) serialization of a OffscreenCanvasRenderingContext2DShim */
 export interface CanvasImageDataShim {
-  serializedCommands: Buffer
+  serializedCommands: Uint8Array
   height: number
   width: number
 }
@@ -28,6 +28,6 @@ export function isCanvasImageDataShim(
     isObject(thing) &&
     'serializedCommands' in thing &&
     'height' in thing &&
-    thing.serializedCommands instanceof Buffer
+    thing.serializedCommands instanceof Uint8Array
   )
 }
