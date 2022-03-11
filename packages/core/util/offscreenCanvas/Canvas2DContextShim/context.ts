@@ -8,8 +8,8 @@ import { getSerializedSvg } from './svg'
 import { MethodName, SetterName } from './types'
 
 //* maximum anticipated size of a binary-serialized call
-const MAX_BINARY_CALL_SIZE = 500
-const COMMAND_PAGE_SIZE = MAX_BINARY_CALL_SIZE * 5000
+const MAX_BINARY_CALL_SIZE = 1500
+const COMMAND_PAGE_SIZE = MAX_BINARY_CALL_SIZE * 8000
 
 /** get the params type of real method in OffscreenCanvasRenderingContext2D */
 type RealP<METHODNAME extends keyof OffscreenCanvasRenderingContext2D> =

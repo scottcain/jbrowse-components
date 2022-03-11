@@ -7,25 +7,23 @@ import {
 } from './command_codec'
 
 test('readstring', () => {
-  const b = new Uint8Array(100)
-  writeString('hello', b, 20)
-  const [str, newOffset] = readString(b, 20)
+  const b = new Uint8Array(10000)
+  writeString('hello', b, 2)
+  const [str, newOffset] = readString(b, 2)
   expect(str).toEqual('hello')
-  expect(newOffset).toBe(26)
-  writeString('hello', b, 0)
-  //       012345
-  writeString('bonjour', b, 6)
-  //       67890123
-  const [str2, b1] = readString(b, 0)
+  expect(newOffset).toBe(16)
+  writeString('hello', b, 1)
+  writeString('bonjour', b, 28)
+  const [str2, b1] = readString(b, 1)
   expect(str2).toBe('hello')
-  expect(b1).toBe(6)
-  const [str3, b2] = readString(b, 6)
+  expect(b1).toBe(14)
+  const [str3, b2] = readString(b, 28)
   expect(str3).toBe('bonjour')
-  expect(b2).toBe(14)
+  expect(b2).toBe(28 + 2 + 7 * 2 + 2)
 })
 
 test('single encode and decode round trip', () => {
-  const b = new Uint8Array(100)
+  const b = new Uint8Array(10000)
   encodeCommand('fillRect', [1, 2, 3, 4], b, 0)
   const decode = decodeSingleCommand(b, 0)
   expect(decode).toEqual([{ name: 'fillRect', args: [1, 2, 3, 4] }, 17])
@@ -60,7 +58,7 @@ test('encode more commands, one without its optional arg', () => {
 })
 
 test('encode more commands, including setters', () => {
-  const b = new Uint8Array(10000)
+  const b = new Uint8Array(100000)
   let offset = 0
   offset = encodeCommand('fillRect', [1, 2, 3, 4], b, offset)
   offset = encodeCommand('fillStyle', ['noggin'], b, offset)

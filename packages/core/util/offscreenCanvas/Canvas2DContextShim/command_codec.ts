@@ -250,6 +250,10 @@ export function decodeSingleCommand(
   if (commandSchema === END_STREAM) {
     return undefined
   }
+  const commandName = commandNames[commandNumber]
+  if (!commandName) {
+    throw new Error('no command name for command number ' + commandNumber)
+  }
   const decodedArgs = []
   let numArgs = commandSchema.length
   for (let i = 0; i < numArgs; i++) {
@@ -273,10 +277,6 @@ export function decodeSingleCommand(
     }
   }
 
-  const commandName = commandNames[commandNumber]
-  if (!commandName) {
-    return
-  }
   return [{ name: commandName, args: decodedArgs }, offset]
 }
 
@@ -307,28 +307,96 @@ function replaySingleCommand(
   return offset
 }
 
-const textDecoder = new TextDecoder()
+// --------------------- native UTF-16 string encoding --------------
+
 /** read a zero-terminated string from a buffer at the given offset
  * @returns [string read, new offset after string]
  */
 export function readString(data: Uint8Array, offset: number): [string, number] {
-  // scan to find the end of the string
-  let stringEnd = offset
-  while (data[stringEnd]) {
-    stringEnd += 1
+  // read beginning marker
+  if (data[offset] === 255 && data[offset + 1] === 255) {
+    // non-padding marker
+    offset += 2
+  } else if (data[offset] === 254) {
+    // padding marker
+    offset += 1
+  } else {
+    throw new Error('invalid string encoding')
   }
+
+  // need to tweak buffer and string decode starts to make
+  // sure the Uint16Array is aligned on an even offset, or it
+  // will throw an error
+  let bufStart = offset
+  let stringStart = 0
+  if (bufStart % 2) {
+    bufStart -= 1
+    stringStart += 1
+  }
+
+  const viewLength = Math.min(
+    255,
+    Math.floor((data.buffer.byteLength - bufStart) / 2),
+  )
+  const view16 = new Uint16Array(data.buffer, bufStart, viewLength)
+  const stringEnd = view16.indexOf(0, stringStart)
   return [
-    textDecoder.decode(data.buffer.slice(offset, stringEnd)),
-    stringEnd + 1,
+    String.fromCharCode.apply(
+      null,
+      view16.subarray(stringStart, stringEnd) as unknown as number[],
+    ),
+    offset + stringEnd * 2 + 2,
   ]
 }
 
-const textEncoder = new TextEncoder()
-export function writeString(s: string, target: Uint8Array, offset: number) {
-  const res = textEncoder.encodeInto(s, target.subarray(offset))
-  if (res.written === undefined) {
-    throw new Error('string write failed')
+/** write a zero-terminated string to the buffer at the given offset
+ * @returns number of bytes written
+ */
+export function writeString(
+  str: string,
+  target: Uint8Array,
+  startingOffset: number,
+) {
+  let offset = startingOffset
+  // write beginning marker, which is [254] if padding needed, or [255,255] if not
+  if (offset % 2) {
+    // need padding to bring offset to even number so we can use Uint16Array
+    target[offset++] = 254
+  } else {
+    target[offset++] = 255
+    target[offset++] = 255
   }
-  target[offset + res.written] = 0 // write zero-terminator
-  return res.written + 1
+
+  const view16 = new Uint16Array(target.buffer, offset, 510)
+  const strLen = str.length
+  let i = 0
+  for (; i < strLen; i++) {
+    view16[i] = str.charCodeAt(i)
+  }
+  view16[i] = 0
+  return offset - startingOffset + (str.length + 1) * 2
 }
+
+// --------------------- UTF-8 string encoding --------------------
+// const textDecoder = new TextDecoder()
+// /** read a zero-terminated string from a buffer at the given offset
+//  * @returns [string read, new offset after string]
+//  */
+// export function readString(data: Uint8Array, offset: number): [string, number] {
+//   // scan to find the end of the string
+//   const stringEnd = data.indexOf(0, offset)
+//   return [
+//     textDecoder.decode(data.buffer.slice(offset, stringEnd)),
+//     stringEnd + 1,
+//   ]
+// }
+
+// const textEncoder = new TextEncoder()
+// export function writeString(s: string, target: Uint8Array, offset: number) {
+//   const res = textEncoder.encodeInto(s, target.subarray(offset))
+//   if (res.written === undefined) {
+//     throw new Error('string write failed')
+//   }
+//   target[offset + res.written] = 0 // write zero-terminator
+//   return res.written + 1
+// }
