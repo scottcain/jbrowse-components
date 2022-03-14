@@ -92,20 +92,18 @@ export default class SNPCoverageAdapter extends BaseFeatureDataAdapter {
       )
 
       bins.forEach((bin, index) => {
-        if (bin.total) {
-          observer.next(
-            new SimpleFeature({
-              id: `${this.id}-${region.start}-${index}`,
-              data: {
-                score: bin.total,
-                snpinfo: bin,
-                start: region.start + index,
-                end: region.start + index + 1,
-                refName: region.refName,
-              },
-            }),
-          )
-        }
+        observer.next(
+          new SimpleFeature({
+            id: `${this.id}-${region.start}-${index}`,
+            data: {
+              score: bin.total,
+              snpinfo: bin,
+              start: region.start + index,
+              end: region.start + index + 1,
+              refName: region.refName,
+            },
+          }),
+        )
       })
 
       // make fake features from the coverage
@@ -202,7 +200,7 @@ export default class SNPCoverageAdapter extends BaseFeatureDataAdapter {
             const fstrand = feature.get('strand')
             const cigarOps = parseCigar(cigar)
 
-            for (let j = fstart; j < fend; j++) {
+            for (let j = fstart; j < fend + 1; j++) {
               const i = j - region.start
               if (i >= 0 && i < binMax) {
                 const bin = bins[i] || {
@@ -213,8 +211,10 @@ export default class SNPCoverageAdapter extends BaseFeatureDataAdapter {
                   noncov: {} as BinType,
                   ref: {} as BinType,
                 }
-                bin.total++
-                inc(bin, fstrand, 'ref', 'ref')
+                if (j !== fend) {
+                  bin.total++
+                  inc(bin, fstrand, 'ref', 'ref')
+                }
                 bins[i] = bin
               }
             }
@@ -247,7 +247,15 @@ export default class SNPCoverageAdapter extends BaseFeatureDataAdapter {
                       epos < bins.length &&
                       pos + fstart < fend
                     ) {
-                      const bin = bins[epos]
+                      const bin = bins[epos] || {
+                        total: 0,
+                        lowqual: {} as BinType,
+                        cov: {} as BinType,
+                        delskips: {} as BinType,
+                        noncov: {} as BinType,
+                        ref: {} as BinType,
+                      }
+
                       if (probabilities[probIndex] > 0.5) {
                         inc(bin, fstrand, 'cov', mod)
                       } else {
@@ -321,12 +329,8 @@ export default class SNPCoverageAdapter extends BaseFeatureDataAdapter {
               if (mismatches) {
                 for (let i = 0; i < mismatches.length; i++) {
                   const mismatch = mismatches[i]
-                  const mstart = fstart + mismatch.start
-                  for (
-                    let j = mstart;
-                    j < mstart + mismatchLen(mismatch);
-                    j++
-                  ) {
+                  const ms = fstart + mismatch.start
+                  for (let j = ms; j < ms + mismatchLen(mismatch); j++) {
                     const epos = j - region.start
                     if (epos >= 0 && epos < bins.length) {
                       const bin = bins[epos]

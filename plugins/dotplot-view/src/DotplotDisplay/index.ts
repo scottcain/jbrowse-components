@@ -5,6 +5,7 @@ import {
   ConfigurationReference,
   ConfigurationSchema,
 } from '@jbrowse/core/configuration'
+import clone from 'clone'
 import DisplayType from '@jbrowse/core/pluggableElementTypes/DisplayType'
 import {
   getParentRenderProps,
@@ -129,7 +130,7 @@ export function stateModelFactory(configSchema: any) {
           self.renderingComponent = undefined
           renderInProgress = undefined
         },
-        setRendered(args: {
+        setRendered(args?: {
           data: any
           reactElement: React.ReactElement
           renderingComponent: React.Component
@@ -182,7 +183,7 @@ function renderBlockData(self: DotplotDisplayModel) {
       rpcManager,
       renderProps: {
         ...self.renderProps(),
-        view: getSnapshot(parent),
+        view: clone(getSnapshot(parent)),
         width: viewWidth,
         height: viewHeight,
         borderSize,
