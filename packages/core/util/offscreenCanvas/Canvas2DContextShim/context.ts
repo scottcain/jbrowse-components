@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  DebuggingValidator,
-  decodeCommands,
-  encodeCommand,
-} from './command_codec'
+import { decodeCommands, encodeCommand } from './binary_command_codec'
+import { DebuggingValidator } from './DebuggingValidator'
 import { getSerializedSvg } from './svg'
 import { MethodName, SetterName } from './types'
 

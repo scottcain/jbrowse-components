@@ -15,7 +15,7 @@ import type {
   createCanvas as NodeCreateCanvas,
   Canvas as NodeCanvas,
 } from 'canvas'
-import { replayCommandsOntoContext } from './Canvas2DContextShim/command_codec'
+import { replayCommandsOntoContext } from './Canvas2DContextShim/binary_command_codec'
 
 export let createCanvas: (width: number, height: number) => AbstractCanvas
 export let createImageBitmap: (

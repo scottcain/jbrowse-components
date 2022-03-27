@@ -4,7 +4,7 @@ import {
   encodeCommand,
   readString,
   writeString,
-} from './command_codec'
+} from './binary_command_codec'
 
 test('readstring', () => {
   const b = new Uint8Array(10000)
