@@ -7,6 +7,7 @@ import BoxRendererType, {
   ResultsSerialized,
   ResultsDeserialized,
 } from '@jbrowse/core/pluggableElementTypes/renderers/BoxRendererType'
+
 import { Theme } from '@material-ui/core'
 import { createJBrowseTheme } from '@jbrowse/core/ui'
 import {
@@ -17,7 +18,8 @@ import {
   Feature,
 } from '@jbrowse/core/util'
 import { renderToAbstractCanvas } from '@jbrowse/core/util/offscreenCanvasUtils'
-import { BaseLayout } from '@jbrowse/core/util/layouts/BaseLayout'
+import { BaseLayout, MultiLayout } from '@jbrowse/core/util/layouts'
+import PileupLayout from './PileupLayout'
 import { getAdapter } from '@jbrowse/core/data_adapters/dataAdapterCache'
 import {
   readConfObject,
@@ -124,6 +126,8 @@ function shouldDrawMismatches(type?: string) {
 
 export default class PileupRenderer extends BoxRendererType {
   supportsSVG = true
+
+  
 
   // get width and height of chars the height is an approximation: width
   // letter M is approximately the height

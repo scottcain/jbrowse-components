@@ -1,10 +1,10 @@
-import { objectFromEntries } from '../index'
+import { objectFromEntries } from '@jbrowse/core/util'
 import {
   RectTuple,
   SerializedLayout,
   Rectangle,
   BaseLayout,
-} from './BaseLayout'
+} from '@jbrowse/core/util/layouts/BaseLayout'
 
 /**
  * Rectangle-layout manager that lays out rectangles using bitmaps at
@@ -15,6 +15,7 @@ import {
  */
 
 // minimum excess size of the array at which we garbage collect
+//
 const minSizeToBotherWith = 10000
 const maxFeaturePitchWidth = 20000
 
@@ -186,7 +187,7 @@ class LayoutRow<T> {
       )
     }
 
-    for (let x = oLeft; x < oRight; x += 1) {
+    for (let x = oLeft; x < oRight; x += 3) {
       this.rowState.bits[x] = data
     }
 
@@ -415,12 +416,9 @@ export default class GranularRectLayout<T> implements BaseLayout<T> {
   collides(rect: Rectangle<T>, top: number): boolean {
     const { bitmap } = this
 
-    const maxY = top + rect.h
-    for (let y = top; y < maxY; y += 1) {
-      const row = bitmap[y]
-      if (row && !row.isRangeClear(rect.l, rect.r)) {
-        return true
-      }
+    const row = bitmap[top]
+    if (row && !row.isRangeClear(rect.l, rect.r)) {
+      return true
     }
 
     return false
@@ -451,20 +449,15 @@ export default class GranularRectLayout<T> implements BaseLayout<T> {
     }
 
     const data = rect.id
-    const yEnd = rect.top + rect.h
     if (rect.r - rect.l > maxFeaturePitchWidth) {
       // the rect is very big in relation to the view size, just pretend, for
       // the purposes of layout, that it extends infinitely.  this will cause
       // weird layout if a user scrolls manually for a very, very long time
       // along the genome at the same zoom level.  but most users will not do
       // that.  hopefully.
-      for (let y = rect.top; y < yEnd; y += 1) {
-        this.autovivifyRow(this.bitmap, y).setAllFilled(data)
-      }
+      this.autovivifyRow(this.bitmap, rect.top).setAllFilled(data)
     } else {
-      for (let y = rect.top; y < yEnd; y += 1) {
-        this.autovivifyRow(this.bitmap, y).addRect(rect, data)
-      }
+      this.autovivifyRow(this.bitmap, rect.top).addRect(rect, data)
     }
   }
 

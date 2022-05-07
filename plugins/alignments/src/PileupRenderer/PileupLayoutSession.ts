@@ -1,10 +1,13 @@
 import deepEqual from 'fast-deep-equal'
 import { LayoutSession } from '@jbrowse/core/pluggableElementTypes/renderers/BoxRendererType'
-import { AnyConfigurationModel } from '@jbrowse/core/configuration/configurationSchema'
 import SerializableFilterChain from '@jbrowse/core/pluggableElementTypes/renderers/util/serializableFilterChain'
 import GranularRectLayout from '@jbrowse/core/util/layouts/GranularRectLayout'
 import MultiLayout from '@jbrowse/core/util/layouts/MultiLayout'
-import { readConfObject } from '@jbrowse/core/configuration'
+import {
+  readConfObject,
+  AnyConfigurationModel,
+} from '@jbrowse/core/configuration'
+import PileupLayout from './PileupLayout'
 
 export interface PileupLayoutSessionProps {
   config: AnyConfigurationModel
@@ -29,6 +32,8 @@ export class PileupLayoutSession extends LayoutSession {
 
   showSoftClip = false
 
+  cachedLayout: CachedPileupLayout | undefined
+
   constructor(args: PileupLayoutSessionProps) {
     super(args)
     this.config = args.config
@@ -41,8 +46,14 @@ export class PileupLayoutSession extends LayoutSession {
       deepEqual(this.sortedBy, cachedLayout.sortedBy)
     )
   }
-
-  cachedLayout: CachedPileupLayout | undefined
+  makeLayout() {
+    return new MultiLayout(PileupLayout, {
+      maxHeight: readConfObject(this.config, 'maxHeight'),
+      displayMode: readConfObject(this.config, 'displayMode'),
+      pitchX: this.bpPerPx,
+      pitchY: readConfObject(this.config, 'noSpacing') ? 1 : 3,
+    })
+  }
 
   get layout(): MyMultiLayout {
     if (!this.cachedLayout || !this.cachedLayoutIsValid(this.cachedLayout)) {
