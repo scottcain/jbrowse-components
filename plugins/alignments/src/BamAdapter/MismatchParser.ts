@@ -260,12 +260,17 @@ export function* getNextRefPos(cigarOps: string[], positions: number[]) {
     }
   }
 }
+const map = { A: 'T', T: 'A', C: 'G', G: 'C' }
+function simpleComplement(letter: keyof typeof map) {
+  return map[letter]
+}
 export function getModificationPositions(
   mm: string,
-  fseq: string,
+  seq: string,
   fstrand: number,
 ) {
-  const seq = fstrand === -1 ? revcom(fseq) : fseq
+  const revflag = fstrand === -1
+  const seqlen = seq.length - 1
   const mods = mm.split(';').filter(mod => !!mod)
   const result = []
   for (let i = 0; i < mods.length; i++) {
@@ -296,18 +301,20 @@ export function getModificationPositions(
     for (let j = 0; j < types.length; j++) {
       const type = types[j]
       let i = 0
-      const positions = []
+      let positions = []
       for (let k = 0; k < skips.length; k++) {
         let delta = +skips[k]
         do {
-          if (base === 'N' || base === seq[i]) {
+          const r = seq[revflag ? seqlen - i : i]
+          const l = revflag ? map[r as keyof typeof map] : r
+          if (base === 'N' || base === l) {
             delta--
           }
           i++
         } while (delta >= 0 && i < seq.length)
 
         const temp = i - 1
-        positions.push(fstrand === -1 ? seq.length - 1 - temp : temp)
+        positions.push(revflag ? seq.length - 1 - temp : temp)
       }
       if (fstrand === -1) {
         positions.sort((a, b) => a - b)
