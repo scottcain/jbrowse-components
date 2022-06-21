@@ -1,27 +1,10 @@
-import React from 'react'
-import { makeStyles } from '@material-ui/core'
+import React, { useState } from 'react'
 
-const useStyles = makeStyles(theme => ({
-  message: {
-    border: '1px solid black',
-    background: '#f88',
-    overflow: 'auto',
-    maxHeight: 200,
-    margin: theme.spacing(1),
-    padding: theme.spacing(1),
-  },
-
-  errorBox: {
-    background: 'lightgrey',
-    border: '1px solid black',
-    margin: 20,
-  },
-}))
 const ErrorMessage = ({ error }: { error: unknown }) => {
-  const classes = useStyles()
-
+  const [showStack, setShowStack] = useState(false)
   let snapshotError = ''
   let str = `${error}`
+  let stack = error?.stack
   const findStr = 'is not assignable'
   const idx = str.indexOf(findStr)
   if (idx !== -1) {
@@ -46,10 +29,34 @@ const ErrorMessage = ({ error }: { error: unknown }) => {
     }
   }
   return (
-    <div className={classes.message}>
-      {str.slice(0, 10000)}
+    <div
+      style={{
+        padding: 4,
+        margin: 4,
+        overflow: 'auto',
+        maxHeight: 200,
+        background: '#f88',
+        border: '1px solid black',
+      }}
+    >
+      {stack ? (
+        <button
+          onClick={() => setShowStack(!showStack)}
+          style={{ float: 'right' }}
+        >
+          {showStack ? 'Hide stack' : 'Show stack'}
+        </button>
+      ) : null}
+      {showStack ? <pre>{stack}</pre> : str.slice(0, 10000)}
+
       {snapshotError ? (
-        <pre className={classes.errorBox}>
+        <pre
+          style={{
+            background: 'lightgrey',
+            border: '1px solid black',
+            margin: 20,
+          }}
+        >
           {JSON.stringify(JSON.parse(snapshotError), null, 2)}
         </pre>
       ) : null}
