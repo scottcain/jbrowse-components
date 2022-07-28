@@ -136,7 +136,7 @@ export default function SetColorDialog({
           color="inherit"
           onClick={() => {
             model.clearLayout()
-            setCurrLayout(model.sources)
+            setCurrLayout([...model.sources])
           }}
         >
           Clear custom settings

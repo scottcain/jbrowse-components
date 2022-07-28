@@ -3970,56 +3970,64 @@
             "bigWigLocation": {
               "uri": "https://www.encodeproject.org/files/ENCFF055ZII/@@download/ENCFF055ZII.bigWig"
             },
-            "group": "group1"
+            "group": "group1",
+            "description": "TF ChIP-seq in H1 - target TEAD4"
           },
           {
             "type": "BigWigAdapter",
             "bigWigLocation": {
               "uri": "https://www.encodeproject.org/files/ENCFF826HEW/@@download/ENCFF826HEW.bigWig"
             },
-            "group": "group1"
+            "group": "group1",
+            "description": "TF ChIP-seq in H1 - target JUN"
           },
           {
             "type": "BigWigAdapter",
             "bigWigLocation": {
               "uri": "https://www.encodeproject.org/files/ENCFF858LIM/@@download/ENCFF858LIM.bigWig"
             },
-            "group": "group1"
+            "group": "group1",
+            "description": "TF ChIP-seq in H1 - target BRCA1"
           },
           {
             "type": "BigWigAdapter",
             "bigWigLocation": {
               "uri": "https://www.encodeproject.org/files/ENCFF425TNW/@@download/ENCFF425TNW.bigWig"
             },
-            "group": "group1"
+            "group": "group1",
+            "description": "TF ChIP-seq in H1 - target BRCA1"
           },
           {
             "type": "BigWigAdapter",
             "bigWigLocation": {
               "uri": "https://www.encodeproject.org/files/ENCFF207RBY/@@download/ENCFF207RBY.bigWig"
             },
-            "group": "group1"
+            "group": "group1",
+            "description": "TF ChIP-seq in H1 - target GTF2F1"
           },
           {
             "type": "BigWigAdapter",
             "bigWigLocation": {
               "uri": "https://www.encodeproject.org/files/ENCFF289CTN/@@download/ENCFF289CTN.bigWig"
             },
-            "group": "group1"
+            "group": "group1",
+            "description": "TF ChIP-seq in H1 - target CBX5"
           },
           {
             "type": "BigWigAdapter",
             "bigWigLocation": {
               "uri": "https://www.encodeproject.org/files/ENCFF884IEG/@@download/ENCFF884IEG.bigWig"
             },
-            "group": "group1"
+            "group": "group1",
+            "description": "TF ChIP-seq in H1 - target REST"
           },
           {
             "type": "BigWigAdapter",
             "bigWigLocation": {
               "uri": "https://www.encodeproject.org/files/ENCFF495SBQ/@@download/ENCFF495SBQ.bigWig"
             },
-            "group": "group1"
+            "group": "group1",
+            "description": "TF ChIP-seq in H1 - target RFX5"
           },
           {
             "type": "BigWigAdapter",
