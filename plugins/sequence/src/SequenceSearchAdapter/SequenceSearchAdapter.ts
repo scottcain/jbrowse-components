@@ -29,7 +29,7 @@ export default class extends BaseFeatureDataAdapter {
   public getFeatures(query: Region, opts: BaseOptions) {
     return ObservableCreate<Feature>(async observer => {
       const sequenceAdapter = await this.configure()
-      const hw = 0
+      const hw = 1000
       let { start: queryStart, end: queryEnd } = query
       queryStart = Math.max(0, queryStart - hw)
       queryEnd += hw
