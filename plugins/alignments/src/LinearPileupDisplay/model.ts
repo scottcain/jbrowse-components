@@ -24,11 +24,11 @@ import {
 
 // icons
 import VisibilityIcon from '@mui/icons-material/Visibility'
-import { ContentCopy as ContentCopyIcon } from '@jbrowse/core/ui/Icons'
 import MenuOpenIcon from '@mui/icons-material/MenuOpen'
 import SortIcon from '@mui/icons-material/Sort'
 import PaletteIcon from '@mui/icons-material/Palette'
 import FilterListIcon from '@mui/icons-material/ClearAll'
+import { ContentCopy as ContentCopyIcon } from '@jbrowse/core/ui/Icons'
 
 // locals
 import { LinearPileupDisplayConfigModel } from './configSchema'
@@ -43,6 +43,7 @@ const SortByTagDlg = lazy(() => import('./components/SortByTag'))
 const SetFeatureHeightDlg = lazy(() => import('./components/SetFeatureHeight'))
 const SetMaxHeightDlg = lazy(() => import('./components/SetMaxHeight'))
 const ModificationsDlg = lazy(() => import('./components/ColorByModifications'))
+const HideSmallIndelsDlg = lazy(() => import('./components/HideSmallIndels'))
 
 // using a map because it preserves order
 const rendererTypes = new Map([
@@ -93,6 +94,9 @@ const stateModelFactory = (configSchema: LinearPileupDisplayConfigModel) =>
           }),
           {},
         ),
+        hideSmallIndels: types.maybe(
+          types.model({ ins: types.number, del: types.number }),
+        ),
       }),
     )
     .volatile(() => ({
@@ -104,6 +108,9 @@ const stateModelFactory = (configSchema: LinearPileupDisplayConfigModel) =>
     .actions(self => ({
       setReady(flag: boolean) {
         self.ready = flag
+      },
+      setHideSmallIndels(val?: { ins: number; del: number }) {
+        self.hideSmallIndels = val
       },
       setMaxHeight(n: number) {
         self.trackMaxHeight = n
@@ -693,6 +700,15 @@ const stateModelFactory = (configSchema: LinearPileupDisplayConfigModel) =>
               checked: self.mismatchAlphaSetting,
               onClick: () => {
                 self.toggleMismatchAlpha()
+              },
+            },
+            {
+              label: 'Hide small indels',
+              onClick: () => {
+                getSession(self).queueDialog(doneCallback => [
+                  HideSmallIndelsDlg,
+                  { model: self, handleClose: doneCallback },
+                ])
               },
             },
           ]
