@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { lazy } from 'react'
 import { Button, Paper, Typography } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import { TrackSelector as TrackSelectorIcon } from '@jbrowse/core/ui/Icons'
@@ -9,9 +9,11 @@ import { observer } from 'mobx-react'
 import { LinearGenomeViewModel } from '..'
 import TrackContainer from './TrackContainer'
 import TracksContainer from './TracksContainer'
-import ImportForm from './ImportForm'
-import GetSequenceDialog from './GetSequenceDialog'
-import SearchResultsDialog from './SearchResultsDialog'
+
+// lazy
+const ImportForm = lazy(() => import('./ImportForm'))
+const GetSequenceDialog = lazy(() => import('./GetSequenceDialog'))
+const SearchResultsDialog = lazy(() => import('./SearchResultsDialog'))
 
 type LGV = LinearGenomeViewModel
 
