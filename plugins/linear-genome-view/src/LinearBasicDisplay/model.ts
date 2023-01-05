@@ -13,10 +13,8 @@ import VisibilityIcon from '@mui/icons-material/Visibility'
 
 // locals
 import { BaseLinearDisplay } from '../BaseLinearDisplay'
-import { Save } from '@jbrowse/core/ui/Icons'
 
 const SetMaxHeightDlg = lazy(() => import('./components/SetMaxHeight'))
-const SaveTrackDataDlg = lazy(() => import('./components/SaveTrackData'))
 
 /**
  * #stateModel LinearBasicDisplay
@@ -175,16 +173,7 @@ function stateModelFactory(configSchema: AnyConfigurationSchemaType) {
               checked: self.showLabels,
               onClick: () => self.toggleShowLabels(),
             },
-            {
-              label: 'Save track data',
-              icon: Save,
-              onClick: () => {
-                getSession(self).queueDialog(handleClose => [
-                  SaveTrackDataDlg,
-                  { model: self, handleClose },
-                ])
-              },
-            },
+
             {
               label: 'Show descriptions',
               icon: VisibilityIcon,

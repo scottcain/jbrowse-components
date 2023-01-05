@@ -4,20 +4,15 @@ import { Dialog, ErrorMessage } from '@jbrowse/core/ui'
 import {
   getSession,
   getContainingView,
-  getContainingTrack,
   Feature,
   Region,
 } from '@jbrowse/core/util'
 import { getConf } from '@jbrowse/core/configuration'
 import { makeStyles } from 'tss-react/mui'
-import {
-  BaseDisplayModel,
-  BaseTrackModel,
-} from '@jbrowse/core/pluggableElementTypes'
+import { BaseTrackModel } from '@jbrowse/core/pluggableElementTypes'
 import { observer } from 'mobx-react'
 
 // locals
-import { LinearGenomeViewModel } from '../../LinearGenomeView'
 import { stringifyGFF3 } from './util'
 
 const useStyles = makeStyles()(theme => ({
@@ -32,19 +27,12 @@ const useStyles = makeStyles()(theme => ({
   },
 }))
 
-type LGV = LinearGenomeViewModel
-
-/**
- * Fetches and returns a list features for a given list of regions
- */
 async function fetchFeatures(
   track: BaseTrackModel,
-  view: LGV,
   regions: Region[],
   signal?: AbortSignal,
 ) {
-  const session = getSession(view)
-  const { rpcManager } = session
+  const { rpcManager } = getSession(track)
   const adapterConfig = getConf(track, ['adapter'])
   const sessionId = 'getSequence'
   return rpcManager.call(sessionId, 'CoreGetFeatures', {
@@ -59,7 +47,7 @@ function SaveTrackDataDlg({
   model,
   handleClose,
 }: {
-  model: BaseDisplayModel
+  model: BaseTrackModel
   handleClose: () => void
 }) {
   const { classes } = useStyles()
@@ -70,11 +58,11 @@ function SaveTrackDataDlg({
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     ;(async () => {
       try {
-        const view = getContainingView(model) as LGV
-        const track = getContainingTrack(model) as BaseTrackModel
+        const view = getContainingView(model)
+        const track = model
         const regions = view.dynamicBlocks.contentBlocks
         setError(undefined)
-        const feats = await fetchFeatures(track, view, regions)
+        const feats = await fetchFeatures(track, regions)
         const ret = stringifyGFF3(feats)
         setFeatures(ret)
       } catch (e) {
