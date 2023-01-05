@@ -44,9 +44,6 @@ const useStyles = makeStyles()({
 
 type LGV = LinearGenomeViewModel
 
-/**
- * Fetches and returns a list features for a given list of regions
- */
 async function fetchSequence(
   model: LGV,
   regions: Region[],
@@ -69,7 +66,6 @@ async function fetchSequence(
     throw new Error(`assembly ${assemblyName} not found`)
   }
   const adapterConfig = getConf(assembly, ['sequence', 'adapter'])
-
   const sessionId = 'getSequence'
   return rpcManager.call(sessionId, 'CoreGetFeatures', {
     adapterConfig,
