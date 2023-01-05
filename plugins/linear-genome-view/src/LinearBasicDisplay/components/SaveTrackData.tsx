@@ -1,25 +1,32 @@
 import React, { useEffect, useState } from 'react'
-import { observer } from 'mobx-react'
+import { Button, DialogActions, DialogContent, TextField } from '@mui/material'
 import { Dialog, ErrorMessage } from '@jbrowse/core/ui'
 import {
   getSession,
+  getContainingView,
+  getContainingTrack,
   Feature,
   Region,
-  getContainingView,
 } from '@jbrowse/core/util'
 import { getConf } from '@jbrowse/core/configuration'
-import { Button, DialogActions, DialogContent } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
+import {
+  BaseDisplayModel,
+  BaseTrackModel,
+} from '@jbrowse/core/pluggableElementTypes'
+import { observer } from 'mobx-react'
 
 // locals
 import { LinearGenomeViewModel } from '../../LinearGenomeView'
-import { BaseTrackModel } from '@jbrowse/core/pluggableElementTypes'
+import { stringifyGFF3 } from './util'
 
 const useStyles = makeStyles()(theme => ({
   root: {
-    width: 500,
+    width: '80em',
   },
-
+  textAreaFont: {
+    fontFamily: 'Courier New',
+  },
   field: {
     margin: theme.spacing(2),
   },
@@ -39,7 +46,6 @@ async function fetchFeatures(
   const session = getSession(view)
   const { rpcManager } = session
   const adapterConfig = getConf(track, ['adapter'])
-
   const sessionId = 'getSequence'
   return rpcManager.call(sessionId, 'CoreGetFeatures', {
     adapterConfig,
@@ -49,41 +55,53 @@ async function fetchFeatures(
   }) as Promise<Feature[]>
 }
 
-function SetMaxHeightDlg({
+function SaveTrackDataDlg({
   model,
   handleClose,
 }: {
-  model: {
-    maxHeight?: number
-    setMaxHeight: Function
-  }
+  model: BaseDisplayModel
   handleClose: () => void
 }) {
   const { classes } = useStyles()
   const [error, setError] = useState<unknown>()
-  const [features, setFeatures] = useState<any>()
+  const [features, setFeatures] = useState<string>()
+
   useEffect(() => {
-    ;async () => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    ;(async () => {
       try {
-        setError(undefined)
         const view = getContainingView(model) as LGV
-        const feats = await fetchFeatures(
-          view,
-          view.dynamicBlocks.contentBlocks,
-        )
-        setFeatures(feats)
+        const track = getContainingTrack(model) as BaseTrackModel
+        const regions = view.dynamicBlocks.contentBlocks
+        setError(undefined)
+        const feats = await fetchFeatures(track, view, regions)
+        const ret = stringifyGFF3(feats)
+        setFeatures(ret)
       } catch (e) {
         console.error(e)
         setError(e)
       }
-    }
-  })
+    })()
+  }, [model])
 
   return (
-    <Dialog open onClose={handleClose} title="Save track data">
+    <Dialog maxWidth="xl" open onClose={handleClose} title="Save track data">
       <DialogContent className={classes.root}>
         {error ? <ErrorMessage error={error} /> : null}
-        {JSON.stringify(features)}
+        <TextField
+          variant="outlined"
+          multiline
+          minRows={5}
+          maxRows={15}
+          fullWidth
+          value={features}
+          InputProps={{
+            readOnly: true,
+            classes: {
+              input: classes.textAreaFont,
+            },
+          }}
+        />
       </DialogContent>
       <DialogActions>
         <Button
@@ -99,4 +117,4 @@ function SetMaxHeightDlg({
   )
 }
 
-export default observer(SetMaxHeightDlg)
+export default observer(SaveTrackDataDlg)
