@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react'
 import { observer } from 'mobx-react'
 import { getEnv } from 'mobx-state-tree'
-import { readConfObject } from '@jbrowse/core/configuration'
+import { getConf } from '@jbrowse/core/configuration'
 import { createJBrowseTheme } from '@jbrowse/core/ui'
 import { ThemeProvider, ScopedCssBaseline } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
@@ -33,9 +33,7 @@ const JBrowseLinearGenomeView = observer(function ({
     throw new Error(`unknown view type ${view.type}`)
   }
   const { ReactComponent } = viewType
-  const theme = createJBrowseTheme(
-    readConfObject(viewState.config.configuration, 'theme'),
-  )
+  const theme = createJBrowseTheme(getConf(viewState.config, 'theme'))
 
   return (
     <ThemeProvider theme={theme}>

@@ -1,17 +1,7 @@
 import { PluginConstructor } from '@jbrowse/core/Plugin'
-import { autorun } from 'mobx'
-import { SnapshotIn, onPatch, IJsonPatch } from 'mobx-state-tree'
-import createModel, {
-  createSessionModel,
-  createConfigModel,
-} from './createModel'
-
-type SessionSnapshot = SnapshotIn<ReturnType<typeof createSessionModel>>
-type ConfigSnapshot = SnapshotIn<ReturnType<typeof createConfigModel>>
-type Assembly = ConfigSnapshot['assembly']
-type Tracks = ConfigSnapshot['tracks']
-type InternetAccounts = ConfigSnapshot['internetAccounts']
-type AggregateTextSearchAdapters = ConfigSnapshot['aggregateTextSearchAdapters']
+//import { autorun } from 'mobx'
+import { onPatch, IJsonPatch } from 'mobx-state-tree'
+import createModel from './createModel'
 
 interface Location {
   refName: string
@@ -21,14 +11,14 @@ interface Location {
 }
 
 interface ViewStateOptions {
-  assembly: Assembly
-  tracks: Tracks
-  internetAccounts?: InternetAccounts
-  aggregateTextSearchAdapters?: AggregateTextSearchAdapters
+  assemblies: any[]
+  tracks: any[]
+  internetAccounts?: any[]
+  aggregateTextSearchAdapters?: any[]
   configuration?: Record<string, unknown>
   plugins?: PluginConstructor[]
   location?: string | Location
-  defaultSession?: SessionSnapshot
+  defaultSession?: any
   disableAddTracks?: boolean
   onChange?: (patch: IJsonPatch, reversePatch: IJsonPatch) => void
   makeWorkerInstance?: () => Worker
@@ -36,7 +26,7 @@ interface ViewStateOptions {
 
 export default function createViewState(opts: ViewStateOptions) {
   const {
-    assembly,
+    assemblies,
     tracks,
     internetAccounts,
     configuration,
@@ -55,59 +45,54 @@ export default function createViewState(opts: ViewStateOptions) {
   if (!defaultSession) {
     defaultSession = {
       name: 'this session',
-      view: {
-        id: 'linearGenomeView',
-        type: 'LinearGenomeView',
-      },
     }
   }
   const stateTree = model.create(
     {
-      config: {
+      jbrowse: {
         configuration,
-        assembly,
+        assemblies,
         tracks,
         internetAccounts,
         aggregateTextSearchAdapters,
       },
-      disableAddTracks,
       session: defaultSession,
     },
     { pluginManager },
   )
-  stateTree.config.internetAccounts.forEach(account => {
-    const internetAccountType = pluginManager.getInternetAccountType(
-      account.type,
-    )
-    if (!internetAccountType) {
-      throw new Error(`unknown internet account type ${account.type}`)
-    }
-    stateTree.addInternetAccount({
-      type: account.type,
-      configuration: account,
-    })
-  })
+  // stateTree.jbrowse.internetAccounts.forEach(account => {
+  //   const internetAccountType = pluginManager.getInternetAccountType(
+  //     account.type,
+  //   )
+  //   if (!internetAccountType) {
+  //     throw new Error(`unknown internet account type ${account.type}`)
+  //   }
+  //   stateTree.addInternetAccount({
+  //     type: account.type,
+  //     configuration: account,
+  //   })
+  // })
   pluginManager.setRootModel(stateTree)
   pluginManager.configure()
-  if (location) {
-    autorun(async reaction => {
-      const { session } = stateTree
-      try {
-        if (!session.view.initialized) {
-          return
-        }
+  // if (location) {
+  //   autorun(async reaction => {
+  //     const { session } = stateTree
+  //     try {
+  //       if (!session.view.initialized) {
+  //         return
+  //       }
 
-        if (typeof location === 'string') {
-          await session.view.navToLocString(location, assembly.name)
-        } else {
-          session.view.navTo(location)
-        }
-      } catch (e) {
-        session.notify(`${e}`, 'error')
-      }
-      reaction.dispose()
-    })
-  }
+  //       if (typeof location === 'string') {
+  //         await session.view.navToLocString(location, assembly.name)
+  //       } else {
+  //         session.view.navTo(location)
+  //       }
+  //     } catch (e) {
+  //       session.notify(`${e}`, 'error')
+  //     }
+  //     reaction.dispose()
+  //   })
+  // }
   if (onChange) {
     onPatch(stateTree, onChange)
   }

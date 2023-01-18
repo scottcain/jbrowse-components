@@ -43,7 +43,7 @@ import sessionModelFactory from './sessionModelFactory'
 import { filterSessionInPlace } from './util'
 import { AnyConfigurationModel } from '@jbrowse/core/configuration'
 
-interface Menu {
+export interface Menu {
   label: string
   menuItems: MenuItem[]
 }
