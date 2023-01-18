@@ -29,33 +29,6 @@ function About({ model }: { model: IAnyStateTreeNode }) {
     .filter(p => pluginManager.pluginMetadata[p.name]?.isCore)
     .map(p => p.name)
 
-  const corePluginsRender = plugins
-    .filter(plugin => {
-      return corePlugins.includes(plugin.name)
-    })
-    .map(plugin => (
-      <li key={plugin.name}>
-        {plugin.name} {plugin.version || ''}
-      </li>
-    ))
-
-  const externalPluginsRender = plugins
-    .filter(plugin => !corePlugins.includes(plugin.name))
-    .map(plugin => {
-      const text = `${plugin.name} ${plugin.version || ''}`
-      return (
-        <li key={plugin.name}>
-          {plugin.url ? (
-            <Link target="_blank" rel="noopener noreferrer" href={plugin.url}>
-              {text}
-            </Link>
-          ) : (
-            text
-          )}
-        </li>
-      )
-    })
-
   return (
     <div className={classes.root}>
       <Typography variant="h4" align="center">
@@ -76,18 +49,39 @@ function About({ model }: { model: IAnyStateTreeNode }) {
         © 2019-2022 The Evolutionary Software Foundation
       </Typography>
       <div className={classes.pluginList}>
-        {!externalPluginsRender.length ? null : (
-          <>
-            <Typography variant="h6">External plugins loaded</Typography>
-            <ul>{externalPluginsRender}</ul>
-          </>
-        )}
-        {!corePluginsRender.length ? null : (
-          <>
-            <Typography variant="h6">Core plugins loaded</Typography>
-            <ul>{corePluginsRender}</ul>
-          </>
-        )}
+        <Typography variant="h6">External plugins loaded</Typography>
+        <ul>
+          {plugins
+            .filter(plugin => !corePlugins.includes(plugin.name))
+            .map(plugin => {
+              const text = `${plugin.name} ${plugin.version || ''}`
+              return (
+                <li key={plugin.name}>
+                  {plugin.url ? (
+                    <Link
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      href={plugin.url}
+                    >
+                      {text}
+                    </Link>
+                  ) : (
+                    text
+                  )}
+                </li>
+              )
+            })}
+        </ul>
+        <Typography variant="h6">Core plugins loaded</Typography>
+        <ul>
+          {plugins
+            .filter(plugin => corePlugins.includes(plugin.name))
+            .map(plugin => (
+              <li key={plugin.name}>
+                {plugin.name} {plugin.version || ''}
+              </li>
+            ))}
+        </ul>
       </div>
     </div>
   )
