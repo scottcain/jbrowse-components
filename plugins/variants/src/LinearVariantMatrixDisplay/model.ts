@@ -29,7 +29,7 @@ export default function stateModelFactory(
         configuration: ConfigurationReference(configSchema),
       }),
     )
-    .views(self => ({
+    .views(() => ({
       get blockType() {
         return 'dynamicBlocks'
       },

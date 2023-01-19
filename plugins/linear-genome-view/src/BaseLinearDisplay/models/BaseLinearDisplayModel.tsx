@@ -278,20 +278,22 @@ function stateModelFactory() {
         addDisposer(
           self,
           autorun(
-            async () => {
-              try {
-                await Promise.all(
-                  [...self.blockState].map(async ([_key, block]) => {
+            () => {
+              return Promise.all(
+                [...self.blockState].map(async ([_key, block]) => {
+                  try {
                     const data = renderBlockData(block)
                     // @ts-ignore
-                    const result = await renderBlockEffect(data, self)
-                    // @ts-ignore
-                    block.setRendered(result)
-                  }),
-                )
-              } catch (e) {
-                console.error(e)
-              }
+                    const result = await renderBlockEffect(data, block)
+                    if (result) {
+                      // @ts-ignore
+                      block.setRendered(result)
+                    }
+                  } catch (e) {
+                    block.setError(e)
+                  }
+                }),
+              )
             },
             {
               name: 'blockRenderer',

@@ -21,8 +21,8 @@ function TooLargeMessage({
           console.error('No global stats?')
         } else {
           model.updateStatsLimit(model.estimatedRegionStats)
-          model.reload()
         }
+        model.reload()
       }}
       buttonText="Force load"
       message={`${regionTooLargeReason ? regionTooLargeReason + '. ' : ''}

@@ -47,14 +47,38 @@ export default class LinearVariantMatrixRenderer extends BoxRendererType {
     const feats = [...features.values()]
     const samples = feats[0].get('samples')
     const keys = Object.keys(samples)
-    const w = canvasWidth / feats.length
     const h = canvasHeight / keys.length
+
+    const mafs = [] as number[]
     for (let i = 0; i < feats.length; i++) {
-      const x = (i / feats.length) * canvasWidth
+      let c = 0
+      for (let j = 0; j < keys.length; j++) {
+        const key = keys[j]
+        const samp = feats[i].get('samples')
+        const s = samp[key].GT[0]
+        if (s === '0|0') {
+        } else if (s === '1|0' || s === '0|1') {
+          c++
+        } else if (s === '1|1') {
+          c++
+        } else {
+          c++
+        }
+      }
+      if (c / keys.length > 0.15) {
+        mafs.push(i)
+      }
+    }
+
+    const w = canvasWidth / mafs.length
+    for (let i = 0; i < mafs.length; i++) {
+      const m = mafs[i]
+      const f = feats[m]
+      const x = (i / mafs.length) * canvasWidth
       for (let j = 0; j < keys.length; j++) {
         const y = (j / keys.length) * canvasHeight
         const key = keys[j]
-        const samp = feats[i].get('samples')
+        const samp = f.get('samples')
         const s = samp[key].GT[0]
         if (s === '0|0') {
           ctx.fillStyle = 'grey'

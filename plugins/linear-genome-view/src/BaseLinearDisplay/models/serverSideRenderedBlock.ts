@@ -10,12 +10,10 @@ import {
 } from 'mobx-state-tree'
 import { readConfObject } from '@jbrowse/core/configuration'
 import {
-  assembleLocString,
   getSession,
   getContainingDisplay,
   getContainingView,
   getViewParams,
-  makeAbortableReaction,
   Feature,
 } from '@jbrowse/core/util'
 import { Region } from '@jbrowse/core/util/types/mst'
