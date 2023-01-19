@@ -5,12 +5,14 @@ import {
   getSession,
   getContainingView,
   isSessionModelWithWidgets,
+  Feature,
 } from '@jbrowse/core/util'
 
-import { Feature } from '@jbrowse/core/util/simpleFeature'
 import { linearBasicDisplayModelFactory } from '@jbrowse/plugin-linear-genome-view'
 import { types } from 'mobx-state-tree'
-import { LinearVariantDisplayConfigModel } from './configSchema'
+
+// locals
+import { AnyConfigurationSchemaType } from '@jbrowse/core/configuration'
 
 /**
  * #stateModel LinearVariantDisplay
@@ -18,7 +20,7 @@ import { LinearVariantDisplayConfigModel } from './configSchema'
  * very similar to basic display, but provides custom widget on feature click
  */
 export default function stateModelFactory(
-  configSchema: LinearVariantDisplayConfigModel,
+  configSchema: AnyConfigurationSchemaType,
 ) {
   return types
     .compose(
