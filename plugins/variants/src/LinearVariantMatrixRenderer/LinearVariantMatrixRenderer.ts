@@ -29,28 +29,45 @@ export interface RenderArgsDeserializedWithFeaturesAndLayout
   features: Map<string, Feature>
 }
 
-interface LayoutFeature {
-  heightPx: number
-  topPx: number
-  feature: Feature
-}
-
 export default class LinearVariantMatrixRenderer extends BoxRendererType {
   supportsSVG = true
 
   makeImageData({
     ctx,
     canvasWidth,
+    canvasHeight,
     renderArgs,
   }: {
     ctx: CanvasRenderingContext2D
     canvasWidth: number
-    layoutRecords: (LayoutFeature | null)[]
+    canvasHeight: number
     renderArgs: RenderArgsDeserializedWithFeaturesAndLayout
   }) {
-    const { config, showSoftClip, colorBy, theme: configTheme } = renderArgs
-    ctx.fillStyle = 'red'
-    ctx.fillRect(0, 0, 100, 100)
+    const { features } = renderArgs
+    const feats = [...features.values()]
+    const samples = feats[0].get('samples')
+    const keys = Object.keys(samples)
+    const w = canvasWidth / feats.length
+    const h = canvasHeight / keys.length
+    for (let i = 0; i < feats.length; i++) {
+      const x = (i / feats.length) * canvasWidth
+      for (let j = 0; j < keys.length; j++) {
+        const y = (j / keys.length) * canvasHeight
+        const key = keys[j]
+        const samp = feats[i].get('samples')
+        const s = samp[key].GT[0]
+        if (s === '0|0') {
+          ctx.fillStyle = 'grey'
+        } else if (s === '1|0' || s === '0|1') {
+          ctx.fillStyle = 'teal'
+        } else if (s === '1|1') {
+          ctx.fillStyle = 'blue'
+        } else {
+          ctx.fillStyle = 'purple'
+        }
+        ctx.fillRect(x, y, w, h)
+      }
+    }
   }
 
   async render(renderProps: RenderArgsDeserialized) {
@@ -62,16 +79,14 @@ export default class LinearVariantMatrixRenderer extends BoxRendererType {
 
     const width = (end - start) / bpPerPx
     const height = 400
-    console.log('t1')
-    const Color = await import('color').then(f => f.default)
     const res = await renderToAbstractCanvas(width, height, renderProps, ctx =>
       this.makeImageData({
         ctx,
         canvasWidth: width,
+        canvasHeight: height,
         renderArgs: {
           ...renderProps,
           features,
-          Color,
         },
       }),
     )

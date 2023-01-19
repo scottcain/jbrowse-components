@@ -14,18 +14,27 @@ import { AnyConfigurationSchemaType } from '@jbrowse/core/configuration'
 export default function stateModelFactory(
   configSchema: AnyConfigurationSchemaType,
 ) {
-  return types.compose(
-    'LinearVariantMatrixDisplay',
-    linearBasicDisplayModelFactory(configSchema),
-    types.model({
-      /**
-       * #property
-       */
-      type: types.literal('LinearVariantMatrixDisplay'),
-      /**
-       * #property
-       */
-      configuration: ConfigurationReference(configSchema),
-    }),
-  )
+  return types
+    .compose(
+      'LinearVariantMatrixDisplay',
+      linearBasicDisplayModelFactory(configSchema),
+      types.model({
+        /**
+         * #property
+         */
+        type: types.literal('LinearVariantMatrixDisplay'),
+        /**
+         * #property
+         */
+        configuration: ConfigurationReference(configSchema),
+      }),
+    )
+    .views(self => ({
+      get blockType() {
+        return 'dynamicBlocks'
+      },
+      get renderDelay() {
+        return 2000
+      },
+    }))
 }

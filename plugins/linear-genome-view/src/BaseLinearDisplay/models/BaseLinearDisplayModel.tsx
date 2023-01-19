@@ -32,7 +32,10 @@ import MenuOpenIcon from '@mui/icons-material/MenuOpen'
 import { LinearGenomeViewModel, ExportSvgOptions } from '../../LinearGenomeView'
 import { Tooltip } from '../components/BaseLinearDisplay'
 import TooLargeMessage from '../components/TooLargeMessage'
-import BlockState, { renderBlockData } from './serverSideRenderedBlock'
+import BlockState, {
+  renderBlockData,
+  renderBlockEffect,
+} from './serverSideRenderedBlock'
 
 type LGV = LinearGenomeViewModel
 
@@ -272,28 +275,53 @@ function stateModelFactory() {
       },
 
       afterAttach() {
+        addDisposer(
+          self,
+          autorun(
+            async () => {
+              try {
+                await Promise.all(
+                  [...self.blockState].map(async ([_key, block]) => {
+                    const data = renderBlockData(block)
+                    // @ts-ignore
+                    const result = await renderBlockEffect(data, self)
+                    // @ts-ignore
+                    block.setRendered(result)
+                  }),
+                )
+              } catch (e) {
+                console.error(e)
+              }
+            },
+            {
+              name: 'blockRenderer',
+              delay: self.renderDelay,
+            },
+          ),
+        )
         // watch the parent's blocks to update our block state when they change,
         // then we recreate the blocks on our own model (creating and deleting to
         // match the parent blocks)
-        const blockWatchDisposer = autorun(() => {
-          const blocksPresent: { [key: string]: boolean } = {}
-          const view = getContainingView(self) as LGV
-          if (view.initialized) {
-            self.blockDefinitions.contentBlocks.forEach(block => {
-              blocksPresent[block.key] = true
-              if (!self.blockState.has(block.key)) {
-                this.addBlock(block.key, block)
-              }
-            })
-            self.blockState.forEach((_, key) => {
-              if (!blocksPresent[key]) {
-                this.deleteBlock(key)
-              }
-            })
-          }
-        })
-
-        addDisposer(self, blockWatchDisposer)
+        addDisposer(
+          self,
+          autorun(() => {
+            const blocksPresent: { [key: string]: boolean } = {}
+            const view = getContainingView(self) as LGV
+            if (view.initialized) {
+              self.blockDefinitions.contentBlocks.forEach(block => {
+                blocksPresent[block.key] = true
+                if (!self.blockState.has(block.key)) {
+                  this.addBlock(block.key, block)
+                }
+              })
+              self.blockState.forEach((_, key) => {
+                if (!blocksPresent[key]) {
+                  this.deleteBlock(key)
+                }
+              })
+            }
+          }),
+        )
       },
 
       /**
