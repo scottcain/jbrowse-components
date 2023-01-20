@@ -52,20 +52,23 @@ export default class LinearVariantMatrixRenderer extends BoxRendererType {
     const mafs = [] as number[]
     for (let i = 0; i < feats.length; i++) {
       let c = 0
+      let c2 = 0
       for (let j = 0; j < keys.length; j++) {
         const key = keys[j]
         const samp = feats[i].get('samples')
         const s = samp[key].GT[0]
+        console.log(s === '.|.')
         if (s === '0|0') {
         } else if (s === '1|0' || s === '0|1') {
           c++
         } else if (s === '1|1') {
           c++
+          c2++
         } else {
           c++
         }
       }
-      if (c / keys.length > 0.15) {
+      if (c / keys.length > 0.15 && c2 / keys.length < 0.85) {
         mafs.push(i)
       }
     }
