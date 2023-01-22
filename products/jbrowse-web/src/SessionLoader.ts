@@ -28,12 +28,10 @@ function addRelativeUris(config: Config, base: URL) {
   }
 }
 
+type Root = { configuration?: Config }
+
 // raw readConf alternative for before conf is initialized
-function readConf(
-  { configuration = {} }: { configuration?: Config },
-  attr: string,
-  def: string,
-) {
+function readConf({ configuration = {} }: Root, attr: string, def: string) {
   return configuration[attr] || def
 }
 
@@ -48,6 +46,9 @@ async function fetchPlugins() {
 }
 
 async function checkPlugins(pluginsToCheck: PluginDefinition[]) {
+  if (!pluginsToCheck.length) {
+    return true
+  }
   const storePlugins = await fetchPlugins()
   return pluginsToCheck.every(p => {
     if (isUMDPluginDefinition(p)) {

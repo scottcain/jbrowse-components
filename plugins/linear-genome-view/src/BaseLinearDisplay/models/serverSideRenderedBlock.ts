@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react'
 import {
-  types,
+  cast,
+  getSnapshot,
   getParent,
   isAlive,
-  cast,
+  types,
   Instance,
-  getSnapshot,
 } from 'mobx-state-tree'
 import { readConfObject } from '@jbrowse/core/configuration'
 import {
@@ -14,13 +14,11 @@ import {
   getContainingDisplay,
   getContainingView,
   getViewParams,
+  isRetryException,
+  AbstractDisplayModel,
   Feature,
 } from '@jbrowse/core/util'
 import { Region } from '@jbrowse/core/util/types/mst'
-import {
-  AbstractDisplayModel,
-  isRetryException,
-} from '@jbrowse/core/util/types'
 
 import {
   getTrackAssemblyNames,
@@ -99,20 +97,13 @@ const blockState = types
               features: Map<string, Feature>
               layout: any
               maxHeightReached: boolean
-              renderProps: any
             }
           | undefined,
       ) {
         if (!props) {
           return
         }
-        const {
-          reactElement,
-          features,
-          layout,
-          maxHeightReached,
-          renderProps,
-        } = props
+        const { reactElement, features, layout, maxHeightReached } = props
         self.filled = true
         self.message = undefined
         self.reactElement = reactElement
@@ -120,7 +111,7 @@ const blockState = types
         self.layout = layout
         self.error = undefined
         self.maxHeightReached = maxHeightReached
-        self.renderProps = renderProps
+        self.renderProps = undefined
         renderInProgress = undefined
       },
       setError(error: Error | unknown) {
@@ -243,22 +234,9 @@ export function renderBlockData(
   }
 }
 
-interface RenderProps {
-  displayError: Error
-  rendererType: any
-  renderProps: { [key: string]: any }
-  rpcManager: { call: Function }
-  cannotBeRenderedReason: string
-  renderArgs: { [key: string]: any }
-}
-
-interface ErrorProps {
-  displayError: string
-}
-
 export async function renderBlockEffect(
-  props: RenderProps | ErrorProps,
-  self: BlockModel,
+  props: ReturnType<typeof renderBlockData>,
+  block: BlockModel,
   signal?: AbortSignal,
 ) {
   const {
@@ -268,35 +246,25 @@ export async function renderBlockEffect(
     renderArgs,
     cannotBeRenderedReason,
     displayError,
-  } = props as RenderProps
-  if (!isAlive(self)) {
-    return undefined
-  }
+  } = props
 
   if (displayError) {
-    self.setError(displayError)
-    return undefined
-  }
-  if (cannotBeRenderedReason) {
-    self.setMessage(cannotBeRenderedReason)
-    return undefined
-  }
-
-  if (renderProps.notReady) {
-    return undefined
-  }
-
-  const { reactElement, features, layout, maxHeightReached } =
-    await rendererType.renderInClient(rpcManager, {
+    block.setError(displayError)
+    return
+  } else if (cannotBeRenderedReason) {
+    block.setMessage(cannotBeRenderedReason)
+    return
+  } else if (renderProps.notReady) {
+    return
+  } else {
+    const res = await rendererType.renderInClient(rpcManager, {
       ...renderArgs,
       ...renderProps,
-      viewParams: getViewParams(self),
+      viewParams: getViewParams(block),
       signal,
     })
-  return {
-    reactElement,
-    features,
-    layout,
-    maxHeightReached,
+    if (isAlive(block)) {
+      block.setRendered(res)
+    }
   }
 }

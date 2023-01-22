@@ -6,20 +6,21 @@ import BoxRendererType, {
   ResultsSerialized,
   ResultsDeserialized,
 } from '@jbrowse/core/pluggableElementTypes/renderers/BoxRendererType'
-import { Feature } from '@jbrowse/core/util'
-import { renderToAbstractCanvas } from '@jbrowse/core/util/offscreenCanvasUtils'
+import { Feature, renderToAbstractCanvas } from '@jbrowse/core/util'
+
+export interface SortParams {
+  type: string
+  pos: number
+  refName: string
+  assemblyName: string
+  tag?: string
+}
 
 export interface RenderArgsDeserialized extends BoxRenderArgsDeserialized {
   colorBy?: { type: string; tag?: string }
   colorTagMap?: Record<string, string>
   modificationTagMap?: Record<string, string>
-  sortedBy?: {
-    type: string
-    pos: number
-    refName: string
-    assemblyName: string
-    tag?: string
-  }
+  sortedBy?: SortParams
   showSoftClip: boolean
   highResolutionScaling: number
 }
@@ -45,6 +46,9 @@ export default class LinearVariantMatrixRenderer extends BoxRendererType {
   }) {
     const { features } = renderArgs
     const feats = [...features.values()]
+    if (!feats.length) {
+      return
+    }
     const samples = feats[0].get('samples')
     const keys = Object.keys(samples)
     const h = canvasHeight / keys.length

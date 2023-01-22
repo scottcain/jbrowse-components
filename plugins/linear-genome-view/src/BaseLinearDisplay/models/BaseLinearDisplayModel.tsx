@@ -283,22 +283,20 @@ function stateModelFactory() {
         addDisposer(
           self,
           autorun(
-            () => {
-              return Promise.all(
-                [...self.blockState].map(async ([_key, block]) => {
-                  try {
-                    const data = renderBlockData(block)
-                    // @ts-ignore
-                    const result = await renderBlockEffect(data, block)
-                    if (result) {
-                      // @ts-ignore
-                      block.setRendered(result)
+            async () => {
+              const view = getContainingView(self) as LGV
+              if (view.initialized) {
+                await Promise.all(
+                  [...self.blockState].map(async ([_key, block]) => {
+                    try {
+                      const data = renderBlockData(block)
+                      await renderBlockEffect(data, block)
+                    } catch (e) {
+                      block.setError(e)
                     }
-                  } catch (e) {
-                    block.setError(e)
-                  }
-                }),
-              )
+                  }),
+                )
+              }
             },
             {
               name: 'blockRenderer',
@@ -323,7 +321,7 @@ function stateModelFactory() {
               })
               self.blockState.forEach((_, key) => {
                 if (!blocksPresent[key]) {
-                  this.deleteBlock(key)
+                  // this.deleteBlock(key)
                 }
               })
             }
