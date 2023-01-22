@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react'
 import { BaseDisplay } from '@jbrowse/core/pluggableElementTypes/models'
 import { getConf } from '@jbrowse/core/configuration'
@@ -147,8 +146,9 @@ function stateModelFactory() {
       /**
        * #getter
        */
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       get TooltipComponent(): React.FC<any> {
-        return Tooltip as unknown as React.FC
+        return Tooltip
       },
 
       /**
@@ -172,6 +172,7 @@ function stateModelFactory() {
        * make this return a react component
        */
       get DisplayMessageComponent() {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return undefined as undefined | React.FC<any>
       },
     }))
@@ -202,7 +203,11 @@ function stateModelFactory() {
       /**
        * #getter
        */
-      getFeatureOverlapping(blockKey: string, x: number, y: number) {
+      getFeatureOverlapping(
+        blockKey: string,
+        x: number,
+        y: number,
+      ): string | undefined {
         return self.blockState.get(blockKey)?.layout?.getByCoord(x, y)
       },
 
@@ -335,7 +340,7 @@ function stateModelFactory() {
           headers?: Record<string, string>
           signal?: AbortSignal
           filters?: string[]
-        },
+        } = {},
       ) {
         if (self.estimatedRegionStatsP) {
           return self.estimatedRegionStatsP
@@ -514,14 +519,19 @@ function stateModelFactory() {
         if (!self.estimatedStatsReady || view.dynamicBlocks.totalBp < 20_000) {
           return false
         }
-        const bpLimitOrDensity = self.userBpPerPxLimit
-          ? view.bpPerPx > self.userBpPerPxLimit
-          : self.currentFeatureScreenDensity > self.maxFeatureScreenDensity
+        const {
+          currentFeatureScreenDensity,
+          maxFeatureScreenDensity,
+          userBpPerPxLimit,
+          currentBytesRequested,
+          maxAllowableBytes,
+        } = self
 
-        return (
-          self.currentBytesRequested > self.maxAllowableBytes ||
-          bpLimitOrDensity
-        )
+        const bpLimitOrDensity = userBpPerPxLimit
+          ? view.bpPerPx > userBpPerPxLimit
+          : currentFeatureScreenDensity > maxFeatureScreenDensity
+
+        return currentBytesRequested > maxAllowableBytes || bpLimitOrDensity
       },
 
       /**
@@ -547,7 +557,6 @@ function stateModelFactory() {
          */
         async reload() {
           self.setError()
-          const aborter = new AbortController()
           const view = getContainingView(self) as LGV
 
           // extra check for contentBlocks.length
@@ -559,7 +568,6 @@ function stateModelFactory() {
           try {
             self.estimatedRegionStatsP = self.estimateRegionsStats(
               view.staticBlocks.contentBlocks,
-              { signal: aborter.signal },
             )
             const estimatedRegionStats = await self.estimatedRegionStatsP
 
@@ -652,8 +660,7 @@ function stateModelFactory() {
        *  react node allows user to force load at current setting
        */
       regionCannotBeRendered(_region: Region) {
-        const { regionTooLarge } = self
-        return regionTooLarge ? <TooLargeMessage model={self} /> : null
+        return self.regionTooLarge ? <TooLargeMessage model={self} /> : null
       },
 
       /**
@@ -686,10 +693,11 @@ function stateModelFactory() {
        */
       renderProps() {
         const view = getContainingView(self) as LGV
+        const { currBpPerPx } = self
+        const { bpPerPx } = view
         return {
-          ...(getParentRenderProps(self) as any),
-          notReady:
-            self.currBpPerPx !== view.bpPerPx || !self.estimatedRegionStats,
+          ...getParentRenderProps(self),
+          notReady: currBpPerPx !== bpPerPx || !self.estimatedRegionStats,
           rpcDriverName: self.rpcDriverName,
           displayModel: self,
           onFeatureClick(_: unknown, featureId?: string) {
@@ -783,8 +791,8 @@ function stateModelFactory() {
         return (
           <>
             {renderings.map((rendering, index) => {
-              const { offsetPx } = roundedDynamicBlocks[index]
-              const offset = offsetPx - viewOffsetPx
+              const block = roundedDynamicBlocks[index]
+              const offset = block.offsetPx - viewOffsetPx
               const clipid = getId(id, index)
 
               return (
