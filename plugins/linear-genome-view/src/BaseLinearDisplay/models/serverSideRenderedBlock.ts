@@ -1,24 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react'
 import {
-  cast,
-  getSnapshot,
+  types,
   getParent,
   isAlive,
-  types,
+  cast,
   Instance,
+  getSnapshot,
 } from 'mobx-state-tree'
 import { readConfObject } from '@jbrowse/core/configuration'
 import {
+  assembleLocString,
   getSession,
   getContainingDisplay,
   getContainingView,
   getViewParams,
-  isRetryException,
-  AbstractDisplayModel,
+  makeAbortableReaction,
   Feature,
 } from '@jbrowse/core/util'
 import { Region } from '@jbrowse/core/util/types/mst'
+import {
+  AbstractDisplayModel,
+  isRetryException,
+} from '@jbrowse/core/util/types'
 
 import {
   getTrackAssemblyNames,
@@ -56,7 +60,22 @@ const blockState = types
       doReload() {
         self.reloadFlag = self.reloadFlag + 1
       },
-
+      afterAttach() {
+        const display = getContainingDisplay(self)
+        makeAbortableReaction(
+          self as any,
+          renderBlockData,
+          renderBlockEffect as any, // reaction doesn't expect async here
+          {
+            name: `${display.id}/${assembleLocString(self.region)} rendering`,
+            delay: display.renderDelay,
+            fireImmediately: true,
+          },
+          this.setLoading,
+          this.setRendered,
+          this.setError,
+        )
+      },
       setStatus(message: string) {
         self.status = message
       },
@@ -97,13 +116,20 @@ const blockState = types
               features: Map<string, Feature>
               layout: any
               maxHeightReached: boolean
+              renderProps: any
             }
           | undefined,
       ) {
         if (!props) {
           return
         }
-        const { reactElement, features, layout, maxHeightReached } = props
+        const {
+          reactElement,
+          features,
+          layout,
+          maxHeightReached,
+          renderProps,
+        } = props
         self.filled = true
         self.message = undefined
         self.reactElement = reactElement
@@ -111,7 +137,7 @@ const blockState = types
         self.layout = layout
         self.error = undefined
         self.maxHeightReached = maxHeightReached
-        self.renderProps = undefined
+        self.renderProps = renderProps
         renderInProgress = undefined
       },
       setError(error: Error | unknown) {
@@ -234,10 +260,23 @@ export function renderBlockData(
   }
 }
 
-export async function renderBlockEffect(
-  props: ReturnType<typeof renderBlockData>,
-  block: BlockModel,
-  signal?: AbortSignal,
+interface RenderProps {
+  displayError: Error
+  rendererType: any
+  renderProps: { [key: string]: any }
+  rpcManager: { call: Function }
+  cannotBeRenderedReason: string
+  renderArgs: { [key: string]: any }
+}
+
+interface ErrorProps {
+  displayError: string
+}
+
+async function renderBlockEffect(
+  props: RenderProps | ErrorProps,
+  signal: AbortSignal,
+  self: BlockModel,
 ) {
   const {
     rendererType,
@@ -246,25 +285,35 @@ export async function renderBlockEffect(
     renderArgs,
     cannotBeRenderedReason,
     displayError,
-  } = props
+  } = props as RenderProps
+  if (!isAlive(self)) {
+    return undefined
+  }
 
   if (displayError) {
-    block.setError(displayError)
-    return
-  } else if (cannotBeRenderedReason) {
-    block.setMessage(cannotBeRenderedReason)
-    return
-  } else if (renderProps.notReady) {
-    return
-  } else {
-    const res = await rendererType.renderInClient(rpcManager, {
+    self.setError(displayError)
+    return undefined
+  }
+  if (cannotBeRenderedReason) {
+    self.setMessage(cannotBeRenderedReason)
+    return undefined
+  }
+
+  if (renderProps.notReady) {
+    return undefined
+  }
+
+  const { reactElement, features, layout, maxHeightReached } =
+    await rendererType.renderInClient(rpcManager, {
       ...renderArgs,
       ...renderProps,
-      viewParams: getViewParams(block),
+      viewParams: getViewParams(self),
       signal,
     })
-    if (isAlive(block)) {
-      block.setRendered(res)
-    }
+  return {
+    reactElement,
+    features,
+    layout,
+    maxHeightReached,
   }
 }

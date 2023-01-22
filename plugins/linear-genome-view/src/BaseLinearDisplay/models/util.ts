@@ -22,3 +22,9 @@ export function getDisplayStr(totalBytes: number) {
   }
   return displayBp
 }
+
+// stabilize clipid under test for snapshot
+export function getId(id: string, index: number) {
+  const isJest = typeof jest === 'undefined'
+  return `clip-${isJest ? id : 'jest'}-${index}`
+}

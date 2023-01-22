@@ -12,10 +12,10 @@ import {
   isSessionModelWithWidgets,
   isFeature,
   Feature,
+  Region,
 } from '@jbrowse/core/util'
 import { Stats } from '@jbrowse/core/data_adapters/BaseAdapter'
 import { BaseBlock } from '@jbrowse/core/util/blockTypes'
-import { Region } from '@jbrowse/core/util/types'
 import CompositeMap from '@jbrowse/core/util/compositeMap'
 import {
   getParentRenderProps,
@@ -31,10 +31,8 @@ import MenuOpenIcon from '@mui/icons-material/MenuOpen'
 import { LinearGenomeViewModel, ExportSvgOptions } from '../../LinearGenomeView'
 import { Tooltip } from '../components/BaseLinearDisplay'
 import TooLargeMessage from '../components/TooLargeMessage'
-import BlockState, {
-  renderBlockData,
-  renderBlockEffect,
-} from './serverSideRenderedBlock'
+import BlockState, { renderBlockData } from './serverSideRenderedBlock'
+import { getId, getDisplayStr } from './util'
 
 type LGV = LinearGenomeViewModel
 
@@ -46,25 +44,7 @@ export interface Layout {
   name: string
 }
 
-// stabilize clipid under test for snapshot
-function getId(id: string, index: number) {
-  const isJest = typeof jest === 'undefined'
-  return `clip-${isJest ? id : 'jest'}-${index}`
-}
-
 type LayoutRecord = [number, number, number, number]
-
-function getDisplayStr(totalBytes: number) {
-  let displayBp
-  if (Math.floor(totalBytes / 1000000) > 0) {
-    displayBp = `${parseFloat((totalBytes / 1000000).toPrecision(3))} Mb`
-  } else if (Math.floor(totalBytes / 1000) > 0) {
-    displayBp = `${parseFloat((totalBytes / 1000).toPrecision(3))} Kb`
-  } else {
-    displayBp = `${Math.floor(totalBytes)} bytes`
-  }
-  return displayBp
-}
 
 const minDisplayHeight = 20
 const defaultDisplayHeight = 100
@@ -280,52 +260,33 @@ function stateModelFactory() {
       },
 
       afterAttach() {
+        // watch the parent's blocks to update our block state when they
+        // change, then we recreate the blocks on our own model (creating and
+        // deleting to match the parent blocks)
         addDisposer(
           self,
           autorun(
-            async () => {
+            () => {
+              const blocksPresent: { [key: string]: boolean } = {}
               const view = getContainingView(self) as LGV
               if (view.initialized) {
-                await Promise.all(
-                  [...self.blockState].map(async ([_key, block]) => {
-                    try {
-                      const data = renderBlockData(block)
-                      await renderBlockEffect(data, block)
-                    } catch (e) {
-                      block.setError(e)
-                    }
-                  }),
-                )
+                self.blockDefinitions.contentBlocks.forEach(block => {
+                  blocksPresent[block.key] = true
+                  if (!self.blockState.has(block.key)) {
+                    this.addBlock(block.key, block)
+                  }
+                })
+                self.blockState.forEach((_, key) => {
+                  if (!blocksPresent[key]) {
+                    this.deleteBlock(key)
+                  }
+                })
               }
             },
             {
-              name: 'blockRenderer',
               delay: self.renderDelay,
             },
           ),
-        )
-        // watch the parent's blocks to update our block state when they change,
-        // then we recreate the blocks on our own model (creating and deleting to
-        // match the parent blocks)
-        addDisposer(
-          self,
-          autorun(() => {
-            const blocksPresent: { [key: string]: boolean } = {}
-            const view = getContainingView(self) as LGV
-            if (view.initialized) {
-              self.blockDefinitions.contentBlocks.forEach(block => {
-                blocksPresent[block.key] = true
-                if (!self.blockState.has(block.key)) {
-                  this.addBlock(block.key, block)
-                }
-              })
-              self.blockState.forEach((_, key) => {
-                if (!blocksPresent[key]) {
-                  // this.deleteBlock(key)
-                }
-              })
-            }
-          }),
         )
       },
 
@@ -517,19 +478,14 @@ function stateModelFactory() {
         if (!self.estimatedStatsReady || view.dynamicBlocks.totalBp < 20_000) {
           return false
         }
-        const {
-          currentFeatureScreenDensity,
-          maxFeatureScreenDensity,
-          userBpPerPxLimit,
-          currentBytesRequested,
-          maxAllowableBytes,
-        } = self
+        const bpLimitOrDensity = self.userBpPerPxLimit
+          ? view.bpPerPx > self.userBpPerPxLimit
+          : self.currentFeatureScreenDensity > self.maxFeatureScreenDensity
 
-        const bpLimitOrDensity = userBpPerPxLimit
-          ? view.bpPerPx > userBpPerPxLimit
-          : currentFeatureScreenDensity > maxFeatureScreenDensity
-
-        return currentBytesRequested > maxAllowableBytes || bpLimitOrDensity
+        return (
+          self.currentBytesRequested > self.maxAllowableBytes ||
+          bpLimitOrDensity
+        )
       },
 
       /**
@@ -691,11 +647,10 @@ function stateModelFactory() {
        */
       renderProps() {
         const view = getContainingView(self) as LGV
-        const { currBpPerPx } = self
-        const { bpPerPx } = view
         return {
           ...getParentRenderProps(self),
-          notReady: currBpPerPx !== bpPerPx || !self.estimatedRegionStats,
+          notReady:
+            self.currBpPerPx !== view.bpPerPx || !self.estimatedRegionStats,
           rpcDriverName: self.rpcDriverName,
           displayModel: self,
           onFeatureClick(_: unknown, featureId?: string) {
