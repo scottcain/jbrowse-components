@@ -17,18 +17,17 @@ export interface SortParams {
 }
 
 export interface RenderArgsDeserialized extends BoxRenderArgsDeserialized {
-  colorBy?: { type: string; tag?: string }
-  colorTagMap?: Record<string, string>
-  modificationTagMap?: Record<string, string>
-  sortedBy?: SortParams
-  showSoftClip: boolean
   highResolutionScaling: number
+  height: number
 }
 
 export interface RenderArgsDeserializedWithFeaturesAndLayout
   extends RenderArgsDeserialized {
   features: Map<string, Feature>
 }
+
+const fudgeFactor = 0.6
+const f2 = fudgeFactor / 2
 
 export default class LinearVariantMatrixRenderer extends BoxRendererType {
   supportsSVG = true
@@ -61,7 +60,6 @@ export default class LinearVariantMatrixRenderer extends BoxRendererType {
         const key = keys[j]
         const samp = feats[i].get('samples')
         const s = samp[key].GT[0]
-        console.log(s === '.|.')
         if (s === '0|0') {
         } else if (s === '1|0' || s === '0|1') {
           c++
@@ -96,20 +94,20 @@ export default class LinearVariantMatrixRenderer extends BoxRendererType {
         } else {
           ctx.fillStyle = 'purple'
         }
-        ctx.fillRect(x, y, w, h)
+        ctx.fillRect(x - f2, y - f2, w + f2, h + f2)
       }
     }
+    return { samples: Object.keys(samples) }
   }
 
   async render(renderProps: RenderArgsDeserialized) {
     const features = await this.getFeatures(renderProps)
-    const { regions, bpPerPx } = renderProps
+    const { height, regions, bpPerPx } = renderProps
     const [region] = regions
 
     const { end, start } = region
 
     const width = (end - start) / bpPerPx
-    const height = 400
     const res = await renderToAbstractCanvas(width, height, renderProps, ctx =>
       this.makeImageData({
         ctx,

@@ -9,9 +9,7 @@ import {
 } from '@jbrowse/core/util'
 
 import { linearBasicDisplayModelFactory } from '@jbrowse/plugin-linear-genome-view'
-import { types } from 'mobx-state-tree'
-
-// locals
+import { Instance, types } from 'mobx-state-tree'
 import { AnyConfigurationSchemaType } from '@jbrowse/core/configuration'
 
 /**
@@ -37,6 +35,7 @@ export default function stateModelFactory(
         configuration: ConfigurationReference(configSchema),
       }),
     )
+
     .actions(self => ({
       /**
        * #action
@@ -70,3 +69,8 @@ export default function stateModelFactory(
       },
     }))
 }
+
+export type LinearVariantDisplayStateModel = ReturnType<
+  typeof stateModelFactory
+>
+export type LinearVariantDisplayModel = Instance<LinearVariantDisplayStateModel>

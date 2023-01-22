@@ -29,12 +29,35 @@ export default function stateModelFactory(
         configuration: ConfigurationReference(configSchema),
       }),
     )
+    .volatile(() => ({
+      samples: undefined as string[] | undefined,
+    }))
     .views(() => ({
       get blockType() {
         return 'dynamicBlocks'
       },
       get renderDelay() {
-        return 2000
+        return 1000
       },
     }))
+    .actions(self => ({
+      /**
+       * #action
+       */
+      setSamples(arg: string[]) {
+        self.samples = arg
+      },
+    }))
+    .views(self => {
+      const { renderProps: superRenderProps } = self
+      return {
+        renderProps() {
+          const superProps = superRenderProps()
+          return {
+            ...superProps,
+            height: self.height,
+          }
+        },
+      }
+    })
 }
