@@ -59,6 +59,7 @@ import MiniControls from './components/MiniControls'
 import Header from './components/Header'
 import ZoomControls from './components/ZoomControls'
 import LinearGenomeView from './components/LinearGenomeView'
+import { getCompatibleDisplays } from '@jbrowse/core/pluggableElementTypes/models/BaseTrackModel'
 
 // lazies
 const SequenceSearchDialog = lazy(
@@ -238,7 +239,7 @@ export function stateModelFactory(pluginManager: PluginManager) {
       volatileWidth: undefined as number | undefined,
       minimumBlockWidth: 3,
       draggingTrackId: undefined as undefined | string,
-      volatileError: undefined as undefined | Error,
+      volatileError: undefined as unknown,
 
       // array of callbacks to run after the next set of the displayedRegions,
       // which is basically like an onLoad
@@ -544,7 +545,7 @@ export function stateModelFactory(pluginManager: PluginManager) {
       /**
        * #action
        */
-      setError(error: Error | undefined) {
+      setError(error: unknown) {
         self.volatileError = error
       },
       /**
@@ -660,8 +661,8 @@ export function stateModelFactory(pluginManager: PluginManager) {
         initialSnapshot = {},
         displayInitialSnapshot = {},
       ) {
-        const schema = pluginManager.pluggableConfigSchemaType('track')
-        const conf = resolveIdentifier(schema, getRoot(self), trackId)
+        const session = getSession(self)
+        const conf = session.tracks.find(t => t.trackId === trackId)
         if (!conf) {
           throw new Error(`Could not resolve identifier "${trackId}"`)
         }
@@ -671,7 +672,22 @@ export function stateModelFactory(pluginManager: PluginManager) {
         }
         const viewType = pluginManager.getViewType(self.type)
         const supportedDisplays = viewType.displayTypes.map(d => d.name)
-        const displayConf = conf.displays.find((d: AnyConfigurationModel) =>
+
+        const { displays = [] } = conf
+        const displayTypes = new Set()
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        displays.forEach((d: any) => d && displayTypes.add(d.type))
+        trackType.displayTypes.forEach(displayType => {
+          if (!displayTypes.has(displayType.name)) {
+            displays.push({
+              displayId: `${conf.trackId}-${displayType.name}`,
+              type: displayType.name,
+            })
+          }
+        })
+
+        const displayConf = displays?.find((d: AnyConfigurationModel) =>
           supportedDisplays.includes(d.type),
         )
         if (!displayConf) {
@@ -680,8 +696,10 @@ export function stateModelFactory(pluginManager: PluginManager) {
           )
         }
 
-        const t = self.tracks.filter(t => t.configuration === conf)
-        if (t.length === 0) {
+        const found = self.tracks.find(
+          t => t.configuration.trackId === conf.trackId,
+        )
+        if (!found) {
           const track = trackType.stateModel.create({
             ...initialSnapshot,
             type: conf.type,
@@ -697,7 +715,7 @@ export function stateModelFactory(pluginManager: PluginManager) {
           self.tracks.push(track)
           return track
         }
-        return t[0]
+        return found
       },
       /**
        * #action

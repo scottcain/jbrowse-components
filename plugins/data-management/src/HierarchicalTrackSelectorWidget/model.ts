@@ -58,8 +58,8 @@ function filterTracks(
     .filter(c => {
       const { displayTypes } = pluginManager.getViewType(self.view.type)
       const compatDisplays = displayTypes.map((d: { name: string }) => d.name)
-      const trackDisplays = c.displays.map((d: { type: string }) => d.type)
-      return hasAnyOverlap(compatDisplays, trackDisplays)
+      const trackDisplays = c.displays?.map((d: { type: string }) => d.type)
+      return true // hasAnyOverlap(compatDisplays, trackDisplays)
     })
 }
 
@@ -116,7 +116,7 @@ export function generateHierarchy(
           id: conf.trackId,
           name: getTrackName(conf, session),
           conf,
-          checked: !!tracks.find(f => f.configuration === conf),
+          checked: !!tracks.find(f => f.configuration.trackId === conf.trackId),
           children: [],
         },
       )

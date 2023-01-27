@@ -17,7 +17,10 @@ import {
 import PluginManager from '../../PluginManager'
 import { MenuItem } from '../../ui'
 import { getContainingView, getEnv, getSession } from '../../util'
-import { isSessionModelWithConfigEditing } from '../../util/types'
+import {
+  AbstractSessionModel,
+  isSessionModelWithConfigEditing,
+} from '../../util/types'
 import { ElementId } from '../../util/types/mst'
 
 export function getCompatibleDisplays(self: IAnyStateTreeNode) {
@@ -202,8 +205,8 @@ export function createBaseTrackModel(
        * #method
        */
       trackMenuItems() {
-        const menuItems: MenuItem[] = self.displays
-          .map(d => d.trackMenuItems())
+        const menuItems = self.displays
+          .map(d => d.trackMenuItems() as MenuItem[])
           .flat()
         const shownId = self.displays[0].configuration.displayId
         const compatDisp = getCompatibleDisplays(self)
