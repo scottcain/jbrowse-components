@@ -9,12 +9,11 @@ beforeEach(() => {
 })
 
 const readBuffer = generateReadBuffer(
-  url => new LocalFile(require.resolve(`../../test_data/volvox/${url}`)),
+  s => new LocalFile(require.resolve(`../../test_data/volvox/${s}`)),
 )
 
 const readBuffer2 = generateReadBuffer(
-  url =>
-    new LocalFile(require.resolve(`../../test_data/volvoxhub/hub1/${url}`)),
+  s => new LocalFile(require.resolve(`../../test_data/volvoxhub/hub1/${s}`)),
 )
 
 const delay = 40000
