@@ -1,50 +1,12 @@
 import { types, getSnapshot, Instance } from 'mobx-state-tree'
-import {
-  getConf,
-  readConfObject,
-  AnyConfigurationModel,
-} from '@jbrowse/core/configuration'
-import { dedupe, getSession, getEnv } from '@jbrowse/core/util'
+import { getConf, AnyConfigurationModel } from '@jbrowse/core/configuration'
+import { dedupe, getSession } from '@jbrowse/core/util'
 import { ElementId } from '@jbrowse/core/util/types/mst'
 import PluginManager from '@jbrowse/core/PluginManager'
 
 // locals
 import { generateHierarchy } from './generateHierarchy'
-
-function hasAnyOverlap<T>(a1: T[] = [], a2: T[] = []) {
-  return !!a1.find(value => a2.includes(value))
-}
-
-export type TreeNode = {
-  name: string
-  id: string
-  conf?: AnyConfigurationModel
-  checked?: boolean
-  isOpenByDefault?: boolean
-  children: TreeNode[]
-}
-
-function filterTracks(
-  tracks: AnyConfigurationModel[],
-  self: { view: { type: string } },
-  assemblyName: string,
-) {
-  const { assemblyManager } = getSession(self)
-  const { pluginManager } = getEnv(self)
-  const assembly = assemblyManager.get(assemblyName)
-  if (!assembly) {
-    return []
-  }
-  const { allAliases } = assembly
-  return tracks
-    .filter(c => hasAnyOverlap(allAliases, readConfObject(c, 'assemblyNames')))
-    .filter(c => {
-      const { displayTypes } = pluginManager.getViewType(self.view.type)
-      const compatDisplays = displayTypes.map((d: { name: string }) => d.name)
-      const trackDisplays = c.displays?.map((d: { type: string }) => d.type)
-      return true // hasAnyOverlap(compatDisplays, trackDisplays)
-    })
-}
+import { relevantTracksForView } from './relevantTracksForView'
 
 export default function stateTreeFactory(pluginManager: PluginManager) {
   return types
@@ -87,7 +49,9 @@ export default function stateTreeFactory(pluginManager: PluginManager) {
       },
     }))
     .views(self => ({
-      getRefSeqTrackConf(assemblyName: string) {
+      getRefSeqTrackConf(
+        assemblyName: string,
+      ): AnyConfigurationModel | undefined {
         const { assemblyManager } = getSession(self)
         const assembly = assemblyManager.get(assemblyName)
         const trackConf = assembly?.configuration.sequence
@@ -100,6 +64,7 @@ export default function stateTreeFactory(pluginManager: PluginManager) {
             return trackConf
           }
         }
+        return undefined
       },
     }))
     .views(self => ({
@@ -116,7 +81,7 @@ export default function stateTreeFactory(pluginManager: PluginManager) {
         // filter out tracks that don't match the current assembly (check all
         // assembly aliases) and display types
         return (refseq ? [refseq] : []).concat([
-          ...filterTracks(tracks, self, assemblyName),
+          ...relevantTracksForView(tracks, self, assemblyName),
         ])
       },
 
@@ -133,7 +98,7 @@ export default function stateTreeFactory(pluginManager: PluginManager) {
         }
 
         // filter out tracks that don't match the current display types
-        return filterTracks(connection.tracks, self, assemblyName)
+        return relevantTracksForView(connection.tracks, self, assemblyName)
       },
     }))
     .views(self => ({
