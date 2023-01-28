@@ -351,7 +351,7 @@ export default function stateModelFactory(pm: PluginManager) {
        * #action
        */
       showTrack(trackId: string, initialSnapshot = {}) {
-        showTrackGeneric(self, trackId, initialSnapshot)
+        return showTrackGeneric(self, trackId, initialSnapshot)
       },
 
       /**
