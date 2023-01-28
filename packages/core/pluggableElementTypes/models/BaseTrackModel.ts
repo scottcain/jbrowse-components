@@ -17,10 +17,7 @@ import {
 import PluginManager from '../../PluginManager'
 import { MenuItem } from '../../ui'
 import { getContainingView, getEnv, getSession } from '../../util'
-import {
-  AbstractSessionModel,
-  isSessionModelWithConfigEditing,
-} from '../../util/types'
+import { isSessionModelWithConfigEditing } from '../../util/types'
 import { ElementId } from '../../util/types/mst'
 
 export function getCompatibleDisplays(self: IAnyStateTreeNode) {
