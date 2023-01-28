@@ -117,6 +117,7 @@ export function createBaseTrackModel(
           (session.adminMode ||
             // @ts-ignore
             session.sessionTracks.find(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (t: any) => t.trackId === self.configuration.trackId,
             ))
         )
