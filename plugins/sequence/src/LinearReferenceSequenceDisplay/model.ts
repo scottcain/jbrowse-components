@@ -5,7 +5,7 @@ import {
 } from '@jbrowse/plugin-linear-genome-view'
 import {
   AnyConfigurationSchemaType,
-  ConfigurationReference,
+  DisplayConfigurationReference,
 } from '@jbrowse/core/configuration'
 import { getContainingView } from '@jbrowse/core/util'
 import { autorun } from 'mobx'
@@ -27,7 +27,7 @@ export function modelFactory(configSchema: AnyConfigurationSchemaType) {
         /**
          * #property
          */
-        configuration: ConfigurationReference(configSchema),
+        configuration: DisplayConfigurationReference(configSchema),
         /**
          * #property
          */
