@@ -76,8 +76,7 @@ test('renders with a couple of uncategorized tracks', async () => {
 
   const { container, findByTestId } = render(
     <ThemeProvider theme={createJBrowseTheme()}>
-      {/* @ts-ignore*/}
-      <HierarchicalTrackSelector model={model} />
+      <HierarchicalTrackSelector model={model} toolbarHeight={20} />
     </ThemeProvider>,
   )
   await findByTestId('hierarchical_track_selector')
