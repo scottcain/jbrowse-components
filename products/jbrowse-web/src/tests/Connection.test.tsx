@@ -1,4 +1,4 @@
-import { fireEvent } from '@testing-library/react'
+import { fireEvent, waitFor } from '@testing-library/react'
 import { LocalFile } from 'generic-filehandle'
 
 import { createView, generateReadBuffer, doBeforeEach } from './util'
@@ -36,8 +36,11 @@ test('Open up a UCSC trackhub connection', async () => {
 
   fireEvent.click(await findByText('File'))
   fireEvent.click(await findByText(/Open connection/))
-  fireEvent.click(await findByText('Next'))
-  fireEvent.change(await findByTestId('urlInput'), {
+  const elt = await findByTestId('addConnectionNext', ...opts)
+  await waitFor(() => expect(elt.getAttribute('disabled')).toBe(null))
+  fireEvent.click(elt)
+  await findByText('nameOfConnection', ...opts)
+  fireEvent.change(await findByTestId('urlInput', ...opts), {
     target: { value: 'https://jbrowse.org/volvoxhub/hub.txt' },
   })
   fireEvent.click(await findByText('Connect'))

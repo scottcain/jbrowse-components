@@ -370,6 +370,10 @@ export default class PluginManager {
     return this.getElementTypesInGroup('adapter') as AdapterType[]
   }
 
+  getConnectionElements() {
+    return this.getElementTypesInGroup('connection') as ConnectionType[]
+  }
+
   /** get a MST type for the union of all specified pluggable MST types */
   pluggableMstType(
     groupName: PluggableElementTypeGroup,

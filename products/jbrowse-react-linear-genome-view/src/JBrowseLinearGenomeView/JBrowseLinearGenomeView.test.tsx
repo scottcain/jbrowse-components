@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react'
+import React from 'react'
 import { render } from '@testing-library/react'
 import { createViewState } from '..'
 import JBrowseLinearGenomeView from './JBrowseLinearGenomeView'
@@ -67,20 +67,17 @@ const defaultSession = {
   },
 }
 
-describe('<JBrowseLinearGenomeView />', () => {
-  it('renders successfully', async () => {
-    const state = createViewState({
-      assembly,
-      tracks: [],
-      defaultSession,
-    })
-    state.session.view.setWidth(800)
-    const { container, findByTestId } = render(
-      <Suspense fallback={<div>Loading...</div>}>
-        <JBrowseLinearGenomeView viewState={state} />
-      </Suspense>,
-    )
-    await findByTestId('sequence_track', {}, { timeout: 10000 })
-    expect(container.firstChild).toMatchSnapshot()
-  }, 10000)
-})
+test('<JBrowseLinearGenomeView /> renders successfully', async () => {
+  const state = createViewState({
+    assembly,
+    tracks: [],
+    defaultSession,
+  })
+  state.session.view.setWidth(800)
+  const { container, findAllByTestId } = render(
+    <JBrowseLinearGenomeView viewState={state} />,
+  )
+  // expect(container.firstChild).toMatchSnapshot()
+  await findAllByTestId('sequence_track', {}, { timeout: 20000 })
+  expect(container.firstChild).toMatchSnapshot()
+}, 25000)
