@@ -5,10 +5,12 @@ import {
 } from '@jbrowse/plugin-linear-genome-view'
 import {
   AnyConfigurationSchemaType,
-  DisplayConfigurationReference,
+  ConfigurationReference,
 } from '@jbrowse/core/configuration'
 import { getContainingView } from '@jbrowse/core/util'
 import { autorun } from 'mobx'
+
+type LGV = LinearGenomeViewModel
 
 /**
  * #stateModel LinearReferenceSequenceDisplay
@@ -27,7 +29,7 @@ export function modelFactory(configSchema: AnyConfigurationSchemaType) {
         /**
          * #property
          */
-        configuration: DisplayConfigurationReference(configSchema),
+        configuration: ConfigurationReference(configSchema),
         /**
          * #property
          */
@@ -66,7 +68,7 @@ export function modelFactory(configSchema: AnyConfigurationSchemaType) {
        * #method
        */
       regionCannotBeRendered(/* region */) {
-        const view = getContainingView(self) as LinearGenomeViewModel
+        const view = getContainingView(self) as LGV
         return view?.bpPerPx >= 1 ? 'Zoom in to see sequence' : undefined
       },
       /**
@@ -99,7 +101,7 @@ export function modelFactory(configSchema: AnyConfigurationSchemaType) {
         addDisposer(
           self,
           autorun(() => {
-            const view = getContainingView(self) as LinearGenomeViewModel
+            const view = getContainingView(self) as LGV
             if (view?.bpPerPx >= 1) {
               self.setHeight(50)
             } else {
