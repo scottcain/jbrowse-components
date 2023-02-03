@@ -276,7 +276,6 @@ export function ConfigurationSchema<
   return schemaType
 }
 
-
 export function TrackConfigurationReference(schemaType: IAnyModelType) {
   const trackRef = types.reference(schemaType, {
     get(identifier, parent) {
