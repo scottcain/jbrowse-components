@@ -1,16 +1,9 @@
 import React, { useState } from 'react'
 import { observer } from 'mobx-react'
 import AutoSizer from 'react-virtualized-auto-sizer'
-import { getSession } from '@jbrowse/core/util'
-import { getSnapshot } from 'mobx-state-tree'
-import { getConf } from '@jbrowse/core/configuration'
 
 // locals
-import {
-  TreeNode,
-  HierarchicalTrackSelectorModel,
-  generateHierarchy,
-} from '../model'
+import { TreeNode, HierarchicalTrackSelectorModel } from '../model'
 import HierarchicalFab from './HierarchicalFab'
 import HierarchicalTree from './tree/HierarchicalTree'
 import HierarchicalHeader from './tree/HierarchicalHeader'
@@ -39,7 +32,7 @@ const AutoSizedHierarchicalTree = ({
       }}
     </AutoSizer>
   ) : (
-    <HierarchicalTree height={20000} model={model} tree={tree} />
+    <HierarchicalTree height={9000} model={model} tree={tree} />
   )
 }
 
@@ -56,6 +49,22 @@ const Wrapper = ({
     <>{children}</>
   )
 }
+const HierarchicalTrackSelectorContainer = observer(function ({
+  model,
+  toolbarHeight,
+  overrideDimensions,
+}: {
+  model: HierarchicalTrackSelectorModel
+  toolbarHeight: number
+  overrideDimensions?: { width: number; height: number }
+}) {
+  return (
+    <Wrapper overrideDimensions={overrideDimensions}>
+      <HierarchicalTrackSelector model={model} toolbarHeight={toolbarHeight} />
+      <HierarchicalFab model={model} />
+    </Wrapper>
+  )
+})
 
 const HierarchicalTrackSelector = observer(function ({
   model,
@@ -85,19 +94,4 @@ const HierarchicalTrackSelector = observer(function ({
   ) : null
 })
 
-export default observer(function ({
-  model,
-  toolbarHeight,
-  overrideDimensions,
-}: {
-  model: HierarchicalTrackSelectorModel
-  toolbarHeight: number
-  overrideDimensions?: { width: number; height: number }
-}) {
-  return (
-    <Wrapper overrideDimensions={overrideDimensions}>
-      <HierarchicalTrackSelector model={model} toolbarHeight={toolbarHeight} />
-      <HierarchicalFab model={model} />
-    </Wrapper>
-  )
-})
+export default HierarchicalTrackSelectorContainer

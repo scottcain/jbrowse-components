@@ -39,6 +39,5 @@ module.exports = {
     'jest-localstorage-mock',
   ],
   testEnvironmentOptions: { url: 'http://localhost' },
-
-  testEnvironment: '@happy-dom/jest-environment',
+  testEnvironment: 'jsdom',
 }

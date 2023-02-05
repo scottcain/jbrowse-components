@@ -77,7 +77,7 @@ test('color by tag', async () => {
   fireEvent.click(await findByTestId('track_menu_icon', ...opts))
   fireEvent.click(await findByText('Color scheme'))
   fireEvent.click(await findByText('Color by tag...'))
-  fireEvent.change(await findByTestId('color-tag-name-input'), {
+  fireEvent.change(await findByTestId('color-tag-name-input', ...opts), {
     target: { value: 'HP' },
   })
   fireEvent.click(await findByText('Submit'))
