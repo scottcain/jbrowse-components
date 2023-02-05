@@ -1,6 +1,6 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import configSnapshot from '../../test_data/volvox/config_main_thread.json'
+import configSnapshot from '../../test_data/volvox/config.json'
 import { LocalFile } from 'generic-filehandle'
 
 import { createView, generateReadBuffer, doBeforeEach } from './util'
@@ -19,7 +19,7 @@ const readBuffer2 = generateReadBuffer(
     new LocalFile(require.resolve(`../../test_data/volvoxhub/hub1/${url}`)),
 )
 
-const delay = { timeout: 40000 }
+const delay = { timeout: 10_000 }
 const opts = [{}, delay]
 const root = 'https://jbrowse.org/volvoxhub/'
 
@@ -39,14 +39,19 @@ test('Open up a UCSC trackhub connection', async () => {
 
   await user.click(await screen.findByText('File'))
   await user.click(await screen.findByText('Open connection...'))
-  const elt = await screen.findByTestId('addConnectionNext', ...opts)
-  await waitFor(() => expect(elt.getAttribute('disabled')).toBe(null))
+
+  const elt = await screen.findByText('Next', ...opts)
+  await waitFor(() => expect(elt).toHaveProperty('disabled', false))
   await user.click(elt)
+
   const input = await findByTestId('urlInput', ...opts)
   await user.clear(input)
   await user.type(input, root + 'hub.txt')
+
   const elt2 = await screen.findByText('Connect', ...opts)
-  await waitFor(() => expect(elt2.getAttribute('disabled')).toBe(null))
+  await waitFor(() => expect(elt2).toHaveProperty('disabled', false))
   await user.click(elt2)
+
+  await user.click(await screen.findByTestId('track_select'))
   await findByText('CRAM - Volvox Sorted', ...opts)
-}, 80000)
+}, 20_000)

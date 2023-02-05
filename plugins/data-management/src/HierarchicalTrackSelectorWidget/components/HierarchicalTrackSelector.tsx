@@ -1,6 +1,9 @@
 import React, { useState } from 'react'
 import { observer } from 'mobx-react'
 import AutoSizer from 'react-virtualized-auto-sizer'
+import { getSession } from '@jbrowse/core/util'
+import { getSnapshot } from 'mobx-state-tree'
+import { getConf } from '@jbrowse/core/configuration'
 
 // locals
 import {
@@ -11,9 +14,6 @@ import {
 import HierarchicalFab from './HierarchicalFab'
 import HierarchicalTree from './tree/HierarchicalTree'
 import HierarchicalHeader from './tree/HierarchicalHeader'
-import { getSession } from '@jbrowse/core/util'
-import { getSnapshot } from 'mobx-state-tree'
-import { getConf } from '@jbrowse/core/configuration'
 
 // Don't use autosizer in jest and instead hardcode a height, otherwise fails
 // jest tests
@@ -26,6 +26,7 @@ const AutoSizedHierarchicalTree = ({
   model: HierarchicalTrackSelectorModel
   offset: number
 }) => {
+  console.log('AutoSizedHierarchicalTree')
   return typeof jest === 'undefined' ? (
     <AutoSizer disableWidth>
       {({ height }) => {
@@ -50,6 +51,7 @@ const Wrapper = ({
   overrideDimensions?: { width: number; height: number }
   children: React.ReactNode
 }) => {
+  console.log('Wrapper')
   return overrideDimensions ? (
     <div style={{ ...overrideDimensions }}>{children}</div>
   ) : (
@@ -103,6 +105,7 @@ const HierarchicalTrackSelector = observer(function ({
   const [assemblyIdx, setAssemblyIdx] = useState(0)
   const [headerHeight, setHeaderHeight] = useState(0)
 
+  console.log('HierarchicalTrackSelector')
   const { assemblyNames } = model
   const assemblyName = assemblyNames[assemblyIdx]
   return assemblyName ? (
@@ -130,6 +133,7 @@ export default observer(function ({
   toolbarHeight: number
   overrideDimensions?: { width: number; height: number }
 }) {
+  console.log('DefaultExport')
   return (
     <Wrapper overrideDimensions={overrideDimensions}>
       <HierarchicalTrackSelector model={model} toolbarHeight={toolbarHeight} />

@@ -16,13 +16,13 @@ export default observer(function ConnectionTypeSelect({
   setConnectionType: (c?: ConnectionType) => void
 }) {
   useEffect(() => {
-    console.log('here2')
+    console.log('ConnectionTypeSelect::effect', !!connectionType)
     if (!connectionType) {
       setConnectionType(connectionTypeChoices[0])
     }
   })
 
-  console.log('here1')
+  console.log('ConnectionTypeSelect::render')
 
   return (
     <form autoComplete="off">
