@@ -537,11 +537,13 @@ export default function RootModel(
               label: 'Open connection...',
               icon: Cable,
               onClick: (session: SessionWithWidgets) => {
-                const widget = session.addWidget(
-                  'AddConnectionWidget',
-                  'addConnectionWidget',
+                console.log('open con')
+                session.showWidget(
+                  session.addWidget(
+                    'AddConnectionWidget',
+                    'addConnectionWidget',
+                  ),
                 )
-                session.showWidget(widget)
               },
             },
             { type: 'divider' },

@@ -840,17 +840,16 @@ export default function sessionModelFactory(
         initialState = {},
         configuration = { type: typeName },
       ) {
-        const typeDefinition = pluginManager.getElementType('widget', typeName)
-        if (!typeDefinition) {
+        const def = pluginManager.getElementType('widget', typeName)
+        if (!def) {
           throw new Error(`unknown widget type ${typeName}`)
         }
-        const data = {
+        self.widgets.set(id, {
           ...initialState,
           id,
           type: typeName,
           configuration,
-        }
-        self.widgets.set(id, data)
+        })
         return self.widgets.get(id)
       },
 

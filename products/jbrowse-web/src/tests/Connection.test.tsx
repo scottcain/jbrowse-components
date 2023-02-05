@@ -1,4 +1,5 @@
-import { fireEvent, waitFor } from '@testing-library/react'
+import { screen, fireEvent, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { LocalFile } from 'generic-filehandle'
 
 import { createView, generateReadBuffer, doBeforeEach } from './util'
@@ -17,11 +18,12 @@ const readBuffer2 = generateReadBuffer(
     new LocalFile(require.resolve(`../../test_data/volvoxhub/hub1/${url}`)),
 )
 
-const delay = 40000
+const delay = { timeout: 40000 }
 const opts = [{}, delay]
 const root = 'https://jbrowse.org/volvoxhub/'
 
 test('Open up a UCSC trackhub connection', async () => {
+  const user = userEvent.setup()
   // @ts-ignore
   fetch.mockResponse(async request => {
     if (request.url.startsWith(root)) {
@@ -32,17 +34,15 @@ test('Open up a UCSC trackhub connection', async () => {
     return readBuffer(request)
   })
 
-  const { findByTestId, findByText } = createView()
+  const { findByTestId } = createView()
 
-  fireEvent.click(await findByText('File'))
-  fireEvent.click(await findByText(/Open connection/))
-  const elt = await findByTestId('addConnectionNext', ...opts)
+  await user.click(await screen.findByText('File'))
+  await user.click(await screen.findByText('Open connection...'))
+  const elt = await screen.findByTestId('addConnectionNext', ...opts)
   await waitFor(() => expect(elt.getAttribute('disabled')).toBe(null))
-  fireEvent.click(elt)
-  await findByText('nameOfConnection', ...opts)
-  fireEvent.change(await findByTestId('urlInput', ...opts), {
-    target: { value: 'https://jbrowse.org/volvoxhub/hub.txt' },
-  })
-  fireEvent.click(await findByText('Connect'))
-  await findByText('CRAM - Volvox Sorted', ...opts)
+  await user.click(elt)
+  const input = await findByTestId('urlInput', ...opts)
+  await user.type(input, 'https://jbrowse.org/volvoxhub/hub.txt')
+  await user.click(await screen.findByText('Connect'))
+  await screen.findByText('CRAM - Volvox Sorted', ...opts)
 }, 40000)

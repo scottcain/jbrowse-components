@@ -6,7 +6,7 @@ import { AnyConfigurationModel } from '@jbrowse/core/configuration'
 import { AbstractSessionModel } from '@jbrowse/core/util'
 import { LoadingEllipses } from '@jbrowse/core/ui'
 
-const ConfigureConnection = observer(function ({
+export default observer(function ({
   connectionType,
   model,
   session,

@@ -40,6 +40,8 @@ export default observer(function AddConnectionWidget({
   const session = getSession(model)
   const { pluginManager } = getEnv(session)
 
+  console.log('active', activeStep)
+
   return (
     <div className={classes.root}>
       <Stepper

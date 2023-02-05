@@ -147,7 +147,7 @@ export const pc = (str: string) => `prerendered_canvas_${str}_done`
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createView(args?: any, adminMode?: boolean) {
   const pluginManager = getPluginManager(args, adminMode)
-  const rest = render(<JBrowse pluginManager={pluginManager} />)
+  const utils = render(<JBrowse pluginManager={pluginManager} />)
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const rootModel = pluginManager.rootModel!
@@ -155,7 +155,7 @@ export function createView(args?: any, adminMode?: boolean) {
   const session = rootModel.session!
 
   const view = session.views[0] as LGV
-  return { view, rootModel, session, ...rest }
+  return { view, rootModel, session, ...utils }
 }
 
 export function doBeforeEach(

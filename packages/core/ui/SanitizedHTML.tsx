@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import escapeHTML from 'escape-html'
 import dompurify from 'dompurify'
 
@@ -50,33 +50,35 @@ export function isHTML(str: string) {
   return full.test(str)
 }
 
-export default function SanitizedHTML({ html }: { html: string }) {
-  const value = isHTML(html) ? html : escapeHTML(html)
-  if (!added) {
-    added = true
-    // see https://github.com/cure53/DOMPurify/issues/317
-    // only have to add this once, and can't do it globally because dompurify
-    // not yet initialized at global scope
-    dompurify.addHook(
-      'afterSanitizeAttributes',
-      (node: {
-        tagName: string
-        setAttribute: (arg0: string, arg1: string) => void
-      }) => {
-        if (node.tagName === 'A') {
-          node.setAttribute('rel', 'noopener noreferrer')
-          node.setAttribute('target', '_blank')
-        }
-      },
-    )
+function post(node: {
+  tagName: string
+  setAttribute: (arg0: string, arg1: string) => void
+}) {
+  if (node.tagName === 'A') {
+    node.setAttribute('rel', 'noopener noreferrer')
+    node.setAttribute('target', '_blank')
   }
+}
 
-  return (
-    <span
-      // eslint-disable-next-line react/no-danger
-      dangerouslySetInnerHTML={{
-        __html: dompurify.sanitize(value),
-      }}
-    />
-  )
+export default function SanitizedHTML({ html }: { html: string }) {
+  console.log('sanitized', html)
+  return html
+  // // useEffect(() => {
+  // //   if (!added) {
+  // //     added = true
+  // //     // see https://github.com/cure53/DOMPurify/issues/317
+  // //     // only have to add this once, and can't do it globally because dompurify
+  // //     // not yet initialized at global scope
+  // //     dompurify.addHook('afterSanitizeAttributes', post)
+  // //   }
+  // // }, [])
+
+  // return (
+  //   <span
+  //     // eslint-disable-next-line react/no-danger
+  //     dangerouslySetInnerHTML={{
+  //       __html: dompurify.sanitize(isHTML(html) ? html : escapeHTML(html)),
+  //     }}
+  //   />
+  // )
 }

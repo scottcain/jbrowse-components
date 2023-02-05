@@ -6,6 +6,7 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:monorepo/recommended",
     "plugin:prettier/recommended",
+    "plugin:testing-library/react",
     "react-app"
   ],
   "parser": "@typescript-eslint/parser",
