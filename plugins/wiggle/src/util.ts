@@ -5,7 +5,7 @@ import {
   getSession,
   getContainingView,
 } from '@jbrowse/core/util'
-import { FeatureStats } from '@jbrowse/core/util/stats'
+import { FeatureScoreStats } from '@jbrowse/core/util/stats'
 import { getRpcSessionId } from '@jbrowse/core/util/tracks'
 import { addDisposer, isAlive } from 'mobx-state-tree'
 
@@ -186,7 +186,7 @@ export async function getStats(
     signal?: AbortSignal
     filters?: string[]
   },
-): Promise<FeatureStats> {
+): Promise<FeatureScoreStats> {
   const { rpcManager } = getSession(self)
   const nd = getConf(self, 'numStdDev') || 3
   const { adapterConfig, autoscaleType } = self
@@ -203,11 +203,11 @@ export async function getStats(
   }
 
   if (autoscaleType === 'global' || autoscaleType === 'globalsd') {
-    const results: FeatureStats = (await rpcManager.call(
+    const results: FeatureScoreStats = (await rpcManager.call(
       sessionId,
       'WiggleGetGlobalStats',
       params,
-    )) as FeatureStats
+    )) as FeatureScoreStats
     const { scoreMin, scoreMean, scoreStdDev } = results
     // globalsd uses heuristic to avoid unnecessary scoreMin<0
     // if the scoreMin is never less than 0
@@ -237,7 +237,7 @@ export async function getStats(
         }),
         bpPerPx,
       },
-    )) as FeatureStats
+    )) as FeatureScoreStats
     const { scoreMin, scoreMean, scoreStdDev } = results
 
     // localsd uses heuristic to avoid unnecessary scoreMin<0 if the
@@ -256,7 +256,7 @@ export async function getStats(
       sessionId,
       'WiggleGetGlobalStats',
       params,
-    ) as Promise<FeatureStats>
+    ) as Promise<FeatureScoreStats>
   }
   throw new Error(`invalid autoscaleType '${autoscaleType}'`)
 }
@@ -266,7 +266,7 @@ export function statsAutorun(self: {
   regionTooLarge: boolean
   setLoading: (aborter: AbortController) => void
   setError: (error: unknown) => void
-  updateStats: (stats: FeatureStats, statsRegion: string) => void
+  updateStats: (stats: FeatureScoreStats, statsRegion: string) => void
   renderProps: () => Record<string, unknown>
   adapterConfig: AnyConfigurationModel
   autoscaleType: string
