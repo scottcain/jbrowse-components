@@ -3,10 +3,17 @@ import { observer } from 'mobx-react'
 import AutoSizer from 'react-virtualized-auto-sizer'
 
 // locals
-import { TreeNode, HierarchicalTrackSelectorModel } from '../model'
+import {
+  TreeNode,
+  HierarchicalTrackSelectorModel,
+  generateHierarchy,
+} from '../model'
 import HierarchicalFab from './HierarchicalFab'
 import HierarchicalTree from './tree/HierarchicalTree'
 import HierarchicalHeader from './tree/HierarchicalHeader'
+import { getSession } from '@jbrowse/core/util'
+import { getSnapshot } from 'mobx-state-tree'
+import { getConf } from '@jbrowse/core/configuration'
 
 // Don't use autosizer in jest and instead hardcode a height, otherwise fails
 // jest tests
@@ -32,7 +39,7 @@ const AutoSizedHierarchicalTree = ({
       }}
     </AutoSizer>
   ) : (
-    <HierarchicalTree height={9000} model={model} tree={tree} />
+    <HierarchicalTree height={20000} model={model} tree={tree} />
   )
 }
 
@@ -49,22 +56,42 @@ const Wrapper = ({
     <>{children}</>
   )
 }
-const HierarchicalTrackSelectorContainer = observer(function ({
-  model,
-  toolbarHeight,
-  overrideDimensions,
-}: {
-  model: HierarchicalTrackSelectorModel
-  toolbarHeight: number
-  overrideDimensions?: { width: number; height: number }
-}) {
-  return (
-    <Wrapper overrideDimensions={overrideDimensions}>
-      <HierarchicalTrackSelector model={model} toolbarHeight={toolbarHeight} />
-      <HierarchicalFab model={model} />
-    </Wrapper>
+
+function hierarchy(self: any, assemblyName: string) {
+  const hier = generateHierarchy(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    self as any,
+    self.trackConfigurations(assemblyName),
+    self.collapsed,
   )
-})
+
+  const session = getSession(self)
+  const { connectionInstances } = session
+  console.log('generating hierarchy')
+
+  const { assemblyManager } = getSession(self)
+  const assembly = assemblyManager.get(assemblyName)
+  const conns =
+    (assembly &&
+      connectionInstances
+        ?.map(c => ({
+          // @ts-ignore
+          id: getSnapshot(c).configuration,
+          name: getConf(c, 'name'),
+          children: self.connectionHierarchy(assemblyName, c),
+          state: {
+            expanded: true,
+          },
+        }))
+        .filter(f => f.children.length)) ||
+    []
+
+  return {
+    name: 'Root',
+    id: 'Root',
+    children: [{ name: 'Tracks', id: 'Tracks', children: hier }, ...conns],
+  }
+}
 
 const HierarchicalTrackSelector = observer(function ({
   model,
@@ -86,7 +113,7 @@ const HierarchicalTrackSelector = observer(function ({
         setAssemblyIdx={setAssemblyIdx}
       />
       <AutoSizedHierarchicalTree
-        tree={model.hierarchy(assemblyName)}
+        tree={hierarchy(model, assemblyName)}
         model={model}
         offset={toolbarHeight + headerHeight}
       />
@@ -94,4 +121,19 @@ const HierarchicalTrackSelector = observer(function ({
   ) : null
 })
 
-export default HierarchicalTrackSelectorContainer
+export default observer(function ({
+  model,
+  toolbarHeight,
+  overrideDimensions,
+}: {
+  model: HierarchicalTrackSelectorModel
+  toolbarHeight: number
+  overrideDimensions?: { width: number; height: number }
+}) {
+  return (
+    <Wrapper overrideDimensions={overrideDimensions}>
+      <HierarchicalTrackSelector model={model} toolbarHeight={toolbarHeight} />
+      <HierarchicalFab model={model} />
+    </Wrapper>
+  )
+})

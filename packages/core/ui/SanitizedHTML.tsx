@@ -61,7 +61,6 @@ function post(node: {
 }
 
 export default function SanitizedHTML({ html }: { html: string }) {
-  console.log('sanitized', html)
   return html
   // // useEffect(() => {
   // //   if (!added) {

@@ -211,53 +211,18 @@ export default function stateTreeFactory(pluginManager: PluginManager) {
           return []
         }
 
+        console.log(connection.tracks)
+
         // filter out tracks that don't match the current display types
         return filterTracks(connection.tracks, self, assemblyName)
       },
     }))
     .views(self => ({
-      hierarchy(assemblyName: string) {
-        const hier = generateHierarchy(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          self as any,
-          self.trackConfigurations(assemblyName),
-          self.collapsed,
-        )
-
-        const session = getSession(self)
-        const { connectionInstances } = session
-
-        const { assemblyManager } = getSession(self)
-        const assembly = assemblyManager.get(assemblyName)
-        const conns =
-          (assembly &&
-            connectionInstances
-              ?.map(c => ({
-                // @ts-ignore
-                id: getSnapshot(c).configuration,
-                name: getConf(c, 'name'),
-                children: this.connectionHierarchy(assemblyName, c),
-                state: {
-                  expanded: true,
-                },
-              }))
-              .filter(f => f.children.length)) ||
-          []
-
-        return {
-          name: 'Root',
-          id: 'Root',
-          children: [
-            { name: 'Tracks', id: 'Tracks', children: hier },
-            ...conns,
-          ],
-        }
-      },
-
       connectionHierarchy(
         assemblyName: string,
         connection: { name: string; tracks: AnyConfigurationModel[] },
       ) {
+        console.log({ assemblyName, connection })
         return generateHierarchy(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           self as any,

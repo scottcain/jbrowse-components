@@ -40,7 +40,12 @@ export default observer(function AddConnectionWidget({
   const session = getSession(model)
   const { pluginManager } = getEnv(session)
 
-  console.log('active', activeStep)
+  console.log('active', activeStep, {
+    disabled: !(
+      (activeStep === 0 && connectionType) ||
+      (activeStep === 1 && configModel)
+    ),
+  })
 
   return (
     <div className={classes.root}>
@@ -93,6 +98,7 @@ export default observer(function AddConnectionWidget({
                   variant="contained"
                   color="primary"
                   onClick={() => {
+                    console.log('wtf', activeStep, steps.length - 1)
                     if (activeStep === steps.length - 1) {
                       const conf = session.addConnectionConf(configModel)
                       session.makeConnection?.(conf)

@@ -531,6 +531,7 @@ export default function sessionModelFactory(
         configuration: AnyConfigurationModel,
         initialSnapshot = {},
       ) {
+        console.log('making conn')
         const { type } = configuration
         if (!type) {
           throw new Error('track configuration has no `type` listed')
@@ -540,13 +541,13 @@ export default function sessionModelFactory(
         if (!connectionType) {
           throw new Error(`unknown connection type ${type}`)
         }
-        const connectionData = {
+        console.log('wow')
+        const length = self.connectionInstances.push({
           ...initialSnapshot,
           name,
           type,
           configuration,
-        }
-        const length = self.connectionInstances.push(connectionData)
+        })
         return self.connectionInstances[length - 1]
       },
 

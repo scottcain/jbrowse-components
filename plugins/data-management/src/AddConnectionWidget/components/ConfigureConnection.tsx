@@ -24,5 +24,3 @@ export default observer(function ({
     </Suspense>
   )
 })
-
-export default ConfigureConnection
