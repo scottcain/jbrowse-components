@@ -46,6 +46,7 @@ let added = false
 // adapted from is-html
 // https://github.com/sindresorhus/is-html/blob/master/index.js
 const full = new RegExp(htmlTags.map(tag => `<${tag}\\b[^>]*>`).join('|'), 'i')
+
 export function isHTML(str: string) {
   return full.test(str)
 }
@@ -60,24 +61,21 @@ function post(node: {
   }
 }
 
-export default function SanitizedHTML({ html }: { html: string }) {
-  return html
-  // // useEffect(() => {
-  // //   if (!added) {
-  // //     added = true
-  // //     // see https://github.com/cure53/DOMPurify/issues/317
-  // //     // only have to add this once, and can't do it globally because dompurify
-  // //     // not yet initialized at global scope
-  // //     dompurify.addHook('afterSanitizeAttributes', post)
-  // //   }
-  // // }, [])
+if (!added) {
+  added = true
+  // see https://github.com/cure53/DOMPurify/issues/317
+  // only have to add this once, and can't do it globally because dompurify
+  // not yet initialized at global scope
+  dompurify.addHook('afterSanitizeAttributes', post)
+}
 
-  // return (
-  //   <span
-  //     // eslint-disable-next-line react/no-danger
-  //     dangerouslySetInnerHTML={{
-  //       __html: dompurify.sanitize(isHTML(html) ? html : escapeHTML(html)),
-  //     }}
-  //   />
-  // )
+export default function SanitizedHTML({ html }: { html: string }) {
+  return (
+    <span
+      // eslint-disable-next-line react/no-danger
+      dangerouslySetInnerHTML={{
+        __html: dompurify.sanitize(isHTML(html) ? html : escapeHTML(html)),
+      }}
+    />
+  )
 }

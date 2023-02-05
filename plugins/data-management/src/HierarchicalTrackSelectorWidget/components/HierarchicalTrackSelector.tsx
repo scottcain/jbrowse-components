@@ -26,7 +26,6 @@ const AutoSizedHierarchicalTree = ({
   model: HierarchicalTrackSelectorModel
   offset: number
 }) => {
-  console.log('AutoSizedHierarchicalTree')
   return typeof jest === 'undefined' ? (
     <AutoSizer disableWidth>
       {({ height }) => {
@@ -51,7 +50,6 @@ const Wrapper = ({
   overrideDimensions?: { width: number; height: number }
   children: React.ReactNode
 }) => {
-  console.log('Wrapper')
   return overrideDimensions ? (
     <div style={{ ...overrideDimensions }}>{children}</div>
   ) : (
@@ -69,7 +67,6 @@ function hierarchy(self: any, assemblyName: string) {
 
   const session = getSession(self)
   const { connectionInstances } = session
-  console.log('generating hierarchy')
 
   const { assemblyManager } = getSession(self)
   const assembly = assemblyManager.get(assemblyName)
@@ -105,7 +102,6 @@ const HierarchicalTrackSelector = observer(function ({
   const [assemblyIdx, setAssemblyIdx] = useState(0)
   const [headerHeight, setHeaderHeight] = useState(0)
 
-  console.log('HierarchicalTrackSelector')
   const { assemblyNames } = model
   const assemblyName = assemblyNames[assemblyIdx]
   return assemblyName ? (
@@ -133,7 +129,6 @@ export default observer(function ({
   toolbarHeight: number
   overrideDimensions?: { width: number; height: number }
 }) {
-  console.log('DefaultExport')
   return (
     <Wrapper overrideDimensions={overrideDimensions}>
       <HierarchicalTrackSelector model={model} toolbarHeight={toolbarHeight} />

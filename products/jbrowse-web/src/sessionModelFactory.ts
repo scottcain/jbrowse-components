@@ -540,17 +540,13 @@ export default function sessionModelFactory(
         if (!connectionType) {
           throw new Error(`unknown connection type ${type}`)
         }
-        console.log('sessionModelFactory::makeConnection')
         const length = self.connectionInstances.push({
           ...initialSnapshot,
           name,
           type,
           configuration,
         })
-        console.log(
-          'sessionModelFactory::connectionInstances',
-          self.connectionInstances.length,
-        )
+
         return self.connectionInstances[length - 1]
       },
 

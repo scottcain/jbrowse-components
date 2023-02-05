@@ -7,7 +7,8 @@ import { DataGrid, GridCellParams } from '@mui/x-data-grid'
 
 // jbrowse
 import { getTrackName } from '@jbrowse/core/util/tracks'
-import { ResizeHandle, SanitizedHTML } from '@jbrowse/core/ui'
+import { ResizeHandle } from '@jbrowse/core/ui'
+import SanitizedHTML from '@jbrowse/core/ui/SanitizedHTML'
 import JBrowseMenu from '@jbrowse/core/ui/Menu'
 import ResizeBar, { useResizeBar } from '@jbrowse/core/ui/ResizeBar'
 import {
