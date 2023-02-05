@@ -537,7 +537,6 @@ export default function RootModel(
               label: 'Open connection...',
               icon: Cable,
               onClick: (session: SessionWithWidgets) => {
-                console.log('open con')
                 session.showWidget(
                   session.addWidget(
                     'AddConnectionWidget',
@@ -602,11 +601,12 @@ export default function RootModel(
               icon: ExtensionIcon,
               onClick: () => {
                 if (self.session) {
-                  const widget = self.session.addWidget(
-                    'PluginStoreWidget',
-                    'pluginStoreWidget',
+                  self.session.showWidget(
+                    self.session.addWidget(
+                      'PluginStoreWidget',
+                      'pluginStoreWidget',
+                    ),
                   )
-                  self.session.showWidget(widget)
                 }
               },
             },

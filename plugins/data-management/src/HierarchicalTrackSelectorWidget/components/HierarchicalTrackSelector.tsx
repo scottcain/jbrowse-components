@@ -57,41 +57,6 @@ const Wrapper = ({
   )
 }
 
-function hierarchy(self: any, assemblyName: string) {
-  const hier = generateHierarchy(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    self as any,
-    self.trackConfigurations(assemblyName),
-    self.collapsed,
-  )
-
-  const session = getSession(self)
-  const { connectionInstances } = session
-
-  const { assemblyManager } = getSession(self)
-  const assembly = assemblyManager.get(assemblyName)
-  const conns =
-    (assembly &&
-      connectionInstances
-        ?.map(c => ({
-          // @ts-ignore
-          id: getSnapshot(c).configuration,
-          name: getConf(c, 'name'),
-          children: self.connectionHierarchy(assemblyName, c),
-          state: {
-            expanded: true,
-          },
-        }))
-        .filter(f => f.children.length)) ||
-    []
-
-  return {
-    name: 'Root',
-    id: 'Root',
-    children: [{ name: 'Tracks', id: 'Tracks', children: hier }, ...conns],
-  }
-}
-
 const HierarchicalTrackSelector = observer(function ({
   model,
   toolbarHeight = 0,
@@ -112,7 +77,7 @@ const HierarchicalTrackSelector = observer(function ({
         setAssemblyIdx={setAssemblyIdx}
       />
       <AutoSizedHierarchicalTree
-        tree={hierarchy(model, assemblyName)}
+        tree={model.hierarchy(assemblyName)}
         model={model}
         offset={toolbarHeight + headerHeight}
       />

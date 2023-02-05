@@ -11,12 +11,11 @@ beforeEach(() => {
 })
 
 const readBuffer = generateReadBuffer(
-  url => new LocalFile(require.resolve(`../../test_data/volvox/${url}`)),
+  s => new LocalFile(require.resolve(`../../test_data/volvox/${s}`)),
 )
 
 const readBuffer2 = generateReadBuffer(
-  url =>
-    new LocalFile(require.resolve(`../../test_data/volvoxhub/hub1/${url}`)),
+  s => new LocalFile(require.resolve(`../../test_data/volvoxhub/hub1/${s}`)),
 )
 
 const delay = { timeout: 10_000 }
@@ -52,6 +51,5 @@ test('Open up a UCSC trackhub connection', async () => {
   await waitFor(() => expect(elt2).toHaveProperty('disabled', false))
   await user.click(elt2)
 
-  await user.click(await screen.findByTestId('track_select'))
   await findByText('CRAM - Volvox Sorted', ...opts)
 }, 20_000)

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import escapeHTML from 'escape-html'
 import dompurify from 'dompurify'
 
@@ -46,35 +46,42 @@ let added = false
 // adapted from is-html
 // https://github.com/sindresorhus/is-html/blob/master/index.js
 const full = new RegExp(htmlTags.map(tag => `<${tag}\\b[^>]*>`).join('|'), 'i')
-
 export function isHTML(str: string) {
   return full.test(str)
 }
 
-function post(node: {
-  tagName: string
-  setAttribute: (arg0: string, arg1: string) => void
-}) {
-  if (node.tagName === 'A') {
-    node.setAttribute('rel', 'noopener noreferrer')
-    node.setAttribute('target', '_blank')
-  }
-}
-
-if (!added) {
-  added = true
-  // see https://github.com/cure53/DOMPurify/issues/317
-  // only have to add this once, and can't do it globally because dompurify
-  // not yet initialized at global scope
-  dompurify.addHook('afterSanitizeAttributes', post)
-}
-
+// note this is mocked during testing, see
+// packages/__mocks__/@jbrowse/core/ui/SanitizedHTML something about dompurify
+// behavior causes errors during tests, was seen in
+// products/jbrowse-web/src/tests/Connection.test.tsx test (can delete mock to
+// see)
+//
 export default function SanitizedHTML({ html }: { html: string }) {
+  const value = isHTML(html) ? html : escapeHTML(html)
+  if (!added) {
+    added = true
+    // see https://github.com/cure53/DOMPurify/issues/317
+    // only have to add this once, and can't do it globally because dompurify
+    // not yet initialized at global scope
+    dompurify.addHook(
+      'afterSanitizeAttributes',
+      (node: {
+        tagName: string
+        setAttribute: (arg0: string, arg1: string) => void
+      }) => {
+        if (node.tagName === 'A') {
+          node.setAttribute('rel', 'noopener noreferrer')
+          node.setAttribute('target', '_blank')
+        }
+      },
+    )
+  }
+
   return (
     <span
       // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{
-        __html: dompurify.sanitize(isHTML(html) ? html : escapeHTML(html)),
+        __html: dompurify.sanitize(value),
       }}
     />
   )
