@@ -243,7 +243,6 @@ function SequenceDialog({
             setTimeout(() => setCopied(false), 500)
           }}
           disabled={loading || !!error || sequenceTooLarge}
-          color="primary"
           startIcon={<ContentCopyIcon />}
         >
           {copied ? 'Copied' : 'Copy to clipboard'}
@@ -258,7 +257,6 @@ function SequenceDialog({
             )
           }}
           disabled={loading || !!error}
-          color="primary"
           startIcon={<GetAppIcon />}
         >
           Download FASTA

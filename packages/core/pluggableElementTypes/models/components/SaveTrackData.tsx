@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import { Button, DialogActions, DialogContent, TextField } from '@mui/material'
-import { Dialog, ErrorMessage } from '@jbrowse/core/ui'
+import {
+  Button,
+  DialogActions,
+  DialogContent,
+  TextField,
+  Typography,
+} from '@mui/material'
+import { makeStyles } from 'tss-react/mui'
+import { observer } from 'mobx-react'
+import { Dialog, ErrorMessage, LoadingEllipses } from '@jbrowse/core/ui'
 import {
   getSession,
   getContainingView,
@@ -8,24 +16,19 @@ import {
   Region,
 } from '@jbrowse/core/util'
 import { getConf } from '@jbrowse/core/configuration'
-import { makeStyles } from 'tss-react/mui'
 import { BaseTrackModel } from '@jbrowse/core/pluggableElementTypes'
-import { observer } from 'mobx-react'
 
 // locals
 import { stringifyGFF3 } from './util'
 
-const useStyles = makeStyles()(theme => ({
+const useStyles = makeStyles()({
   root: {
     width: '80em',
   },
   textAreaFont: {
     fontFamily: 'Courier New',
   },
-  field: {
-    margin: theme.spacing(2),
-  },
-}))
+})
 
 async function fetchFeatures(
   track: BaseTrackModel,
@@ -34,7 +37,7 @@ async function fetchFeatures(
 ) {
   const { rpcManager } = getSession(track)
   const adapterConfig = getConf(track, ['adapter'])
-  const sessionId = 'getSequence'
+  const sessionId = 'getFeatures'
   return rpcManager.call(sessionId, 'CoreGetFeatures', {
     adapterConfig,
     regions,
@@ -43,7 +46,7 @@ async function fetchFeatures(
   }) as Promise<Feature[]>
 }
 
-function SaveTrackDataDlg({
+export default observer(function SaveTrackDataDlg({
   model,
   handleClose,
 }: {
@@ -52,19 +55,17 @@ function SaveTrackDataDlg({
 }) {
   const { classes } = useStyles()
   const [error, setError] = useState<unknown>()
-  const [features, setFeatures] = useState<string>()
+  const [features, setFeatures] = useState<Feature[]>()
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     ;(async () => {
       try {
         const view = getContainingView(model)
-        const track = model
-        const regions = view.dynamicBlocks.contentBlocks
         setError(undefined)
-        const feats = await fetchFeatures(track, regions)
-        const ret = stringifyGFF3(feats)
-        setFeatures(ret)
+        setFeatures(
+          await fetchFeatures(model, view.dynamicBlocks.contentBlocks),
+        )
       } catch (e) {
         console.error(e)
         setError(e)
@@ -72,17 +73,24 @@ function SaveTrackDataDlg({
     })()
   }, [model])
 
+  const str = features ? stringifyGFF3(features) : ''
+
   return (
     <Dialog maxWidth="xl" open onClose={handleClose} title="Save track data">
       <DialogContent className={classes.root}>
         {error ? <ErrorMessage error={error} /> : null}
+        {!features ? (
+          <LoadingEllipses />
+        ) : !features.length ? (
+          <Typography>No features found</Typography>
+        ) : null}
         <TextField
           variant="outlined"
           multiline
           minRows={5}
           maxRows={15}
           fullWidth
-          value={features}
+          value={str}
           InputProps={{
             readOnly: true,
             classes: {
@@ -92,17 +100,10 @@ function SaveTrackDataDlg({
         />
       </DialogContent>
       <DialogActions>
-        <Button
-          variant="contained"
-          color="primary"
-          type="submit"
-          onClick={() => handleClose()}
-        >
+        <Button variant="contained" type="submit" onClick={() => handleClose()}>
           Close
         </Button>
       </DialogActions>
     </Dialog>
   )
-}
-
-export default observer(SaveTrackDataDlg)
+})
