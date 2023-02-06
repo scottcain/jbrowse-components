@@ -12,6 +12,7 @@ import {
   Typography,
 } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
+import { saveAs } from 'file-saver'
 import { observer } from 'mobx-react'
 import { Dialog, ErrorMessage, LoadingEllipses } from '@jbrowse/core/ui'
 import {
@@ -23,8 +24,12 @@ import {
 import { getConf } from '@jbrowse/core/configuration'
 import { BaseTrackModel } from '@jbrowse/core/pluggableElementTypes'
 
+// icons
+import GetAppIcon from '@mui/icons-material/GetApp'
+
 // locals
-import { stringifyGenbank, stringifyGFF3 } from './util'
+import { stringifyGFF3 } from './gff3'
+import { stringifyGenbank } from './genbank'
 
 const useStyles = makeStyles()({
   root: {
@@ -62,7 +67,11 @@ export default observer(function SaveTrackDataDlg({
   const [error, setError] = useState<unknown>()
   const [features, setFeatures] = useState<Feature[]>()
   const [type, setType] = useState('gff3')
-  const options = { gff3: 'GFF3', genbank: 'GenBank' }
+  const [str, setStr] = useState('')
+  const options = {
+    gff3: { name: 'GFF3', extension: 'gff3' },
+    genbank: { name: 'GenBank', extension: 'genbank' },
+  }
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -80,11 +89,25 @@ export default observer(function SaveTrackDataDlg({
     })()
   }, [model])
 
-  const str = features
-    ? type === 'gff3'
-      ? stringifyGFF3(features)
-      : stringifyGenbank(features, {})
-    : ''
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    ;(async () => {
+      const view = getContainingView(model)
+      const session = getSession(model)
+      if (!features) {
+        return
+      }
+      const str = await (type === 'gff3'
+        ? stringifyGFF3(features)
+        : stringifyGenbank({
+            features,
+            session,
+            assemblyName: view.dynamicBlocks.contentBlocks[0].assemblyName,
+          }))
+
+      setStr(str)
+    })()
+  }, [type, features, model])
 
   return (
     <Dialog maxWidth="xl" open onClose={handleClose} title="Save track data">
@@ -103,7 +126,12 @@ export default observer(function SaveTrackDataDlg({
             onChange={event => setType(event.target.value)}
           >
             {Object.entries(options).map(([key, val]) => (
-              <FormControlLabel value={key} control={<Radio />} label={val} />
+              <FormControlLabel
+                key={key}
+                value={key}
+                control={<Radio />}
+                label={val.name}
+              />
             ))}
           </RadioGroup>
         </FormControl>
@@ -123,6 +151,23 @@ export default observer(function SaveTrackDataDlg({
         />
       </DialogContent>
       <DialogActions>
+        <Button
+          onClick={() => {
+            saveAs(
+              new Blob([str || ''], {
+                type: 'text/plain;charset=utf-8',
+              }),
+              `jbrowse_track_data.${
+                options[type as keyof typeof options].extension
+              }`,
+            )
+          }}
+          disabled={!str || !!error}
+          startIcon={<GetAppIcon />}
+        >
+          Download
+        </Button>
+
         <Button variant="contained" type="submit" onClick={() => handleClose()}>
           Close
         </Button>

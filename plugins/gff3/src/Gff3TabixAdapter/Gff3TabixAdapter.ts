@@ -148,7 +148,8 @@ export default class extends BaseFeatureDataAdapter {
               f.get('end'),
               originalQuery.start,
               originalQuery.end,
-            )
+            ) &&
+            f.get('type') !== 'region'
           ) {
             observer.next(f)
           }
