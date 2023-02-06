@@ -73,3 +73,25 @@ export function stringifyGFF3(feats: Feature[]) {
     '\n',
   )
 }
+// LOCUS       Exported                1699 bp DNA     linear   UNA 04-FEB-2023
+// FEATURES             Location/Qualifiers
+//     source          1..1699
+//     CDS             join(428..659,794..1099)
+//     CDS             complement(join(1278..1411,1515..1650))
+// ORIGIN
+//       1 ttaatttgaaatagtttccattttttgataataatgaaaagctgctgaaaaaatggtttggcagttagcaattccaggaattttttcgagataagccataaattttaaaattatggaaattgatttacgtgtgtttttttctaattctaaattttttggtgacgttttccacgttgatttatttatttttcgaacccccctttccctcaaccaaaatagtatttattcttcagtttcaatattgtcaaaaagctcgatgcccgagtattttgaatcttctgcgatttcaattagaagaaatgctgcaggaaacgacgttcaaaaggtaattgaaagcatttagaacatctcataaagatgatgtttcagaacaaagttcaaaattggcttcacagtgtgatcgagcgtctcaagtggtggagtcccggacgatgtcagcagctcttcgtcgagaatgagctcatcgagctatgctacagagctcgtgagcagttctggaaaaacaaagtgaagctagatgtacgtttagcgtatgagggattagcaattcattttctaataatttcagatcgaagctcctgtcaaaatctgtggagacattcacggacagttcgaggacttgatggctctgttcgagttgaatgggtggcctgaagagcataagtaagccgccaatttgaatttggattagtatatgttttcatttcagatatctctttcttggtgattatgttgaccgtggtccattctccattgaagtcatcacactcctcttcacctttcaaatattgatgcctgacaaagtcttccttcttcgaggaaaccacgaaagccgccccgtcaatatgcaatatggattttatctggaatgcaagaagcgctactcagtcgccttgtatgatgcatttcaacttgcattcaattgtatgccactgtgcgctgtcgtgagcaagaagatcatatgtatgcatggaggaatatctgaagatctgattgacttgacgtaagatctttttccaatttccttatgtacttcaacaaccaatttccagacaactcgaaaagattgatcgtccatttgatattccggacattggcgtcatctccgacttgacctgggctgatcccgacgagaaggtcttcggatatgccgattctccacgtggcgcgggacgttctttcggtccgaatgcggtcaagaagttccttcaaatgcacaacctggatctagtcgttcgtgcccatcaggtcgtcatggatggttatgaattctttgcggaccgccaacttgtcacagtcttctcggcaccatcatactgcggacaattcgacaatgctgctgccgtgatgaatgttgacgacaaattgctctgtactttcacaatcttccgcccggatttgaaagttggcgacttcaagaagaaggacaagtgatattttgatttatcgaaataaagcattttttgtaccgtcttgattttcaggttaggctcgaatcacgcgcgcctgcttctcgaccttaaaaatgcctccaggtacaccaggaggcgagcccgctaagcaagaattccagcgccttctcccttctctcccgcttcctgagaatattgatgacataatcggtattctttttgtgtgtgcctgtatccattattcacgcacacaagaacaccaacaagcatgctggttttcttatata
+/// /
+export function stringifyGenbank(
+  feats: Feature[],
+  { name = 'Exported', length = 100 }: { name?: string; length?: number },
+) {
+  const today = new Date()
+  const month = today.toLocaleString('en-US', { month: 'short' }).toUpperCase()
+  const day = today.toLocaleString('en-US', { day: 'numeric' })
+  const year = today.toLocaleString('en-US', { year: 'numeric' })
+  const date = `${day}-${month}-${year}`
+  const l1 = `LOCUS       ${name}     ${length} bp DNA      linear    UNA  ${date}`
+  const l2 = 'FEATURES             Location/Qualifiers'
+  const l3 = `     source          1..${length}`
+  return [l1, l2, l3].join('\n')
+}

@@ -3,6 +3,11 @@ import {
   Button,
   DialogActions,
   DialogContent,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  Radio,
+  RadioGroup,
   TextField,
   Typography,
 } from '@mui/material'
@@ -19,7 +24,7 @@ import { getConf } from '@jbrowse/core/configuration'
 import { BaseTrackModel } from '@jbrowse/core/pluggableElementTypes'
 
 // locals
-import { stringifyGFF3 } from './util'
+import { stringifyGenbank, stringifyGFF3 } from './util'
 
 const useStyles = makeStyles()({
   root: {
@@ -56,6 +61,8 @@ export default observer(function SaveTrackDataDlg({
   const { classes } = useStyles()
   const [error, setError] = useState<unknown>()
   const [features, setFeatures] = useState<Feature[]>()
+  const [type, setType] = useState('gff3')
+  const options = { gff3: 'GFF3', genbank: 'GenBank' }
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -73,7 +80,11 @@ export default observer(function SaveTrackDataDlg({
     })()
   }, [model])
 
-  const str = features ? stringifyGFF3(features) : ''
+  const str = features
+    ? type === 'gff3'
+      ? stringifyGFF3(features)
+      : stringifyGenbank(features, {})
+    : ''
 
   return (
     <Dialog maxWidth="xl" open onClose={handleClose} title="Save track data">
@@ -84,6 +95,18 @@ export default observer(function SaveTrackDataDlg({
         ) : !features.length ? (
           <Typography>No features found</Typography>
         ) : null}
+
+        <FormControl>
+          <FormLabel>File type</FormLabel>
+          <RadioGroup
+            value={type}
+            onChange={event => setType(event.target.value)}
+          >
+            {Object.entries(options).map(([key, val]) => (
+              <FormControlLabel value={key} control={<Radio />} label={val} />
+            ))}
+          </RadioGroup>
+        </FormControl>
         <TextField
           variant="outlined"
           multiline
