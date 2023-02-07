@@ -224,57 +224,6 @@ function stateModelFactory(configSchema: AnyConfigurationSchemaType) {
       },
     }))
     .actions(self => ({
-      afterAttach() {
-        addDisposer(
-          self,
-          autorun(() => prepareTrack(self), { delay: 1000 }),
-        )
-
-        // autorun synchronizes featureUnderMouse with featureIdUnderMouse
-        // asynchronously. this is needed due to how we do not serialize all
-        // features from the BAM/CRAM over the rpc
-        addDisposer(
-          self,
-          autorun(async () => {
-            const session = getSession(self)
-            try {
-              const featureId = self.featureIdUnderMouse
-              if (self.featureUnderMouse?.id() !== featureId) {
-                if (!featureId) {
-                  self.setFeatureUnderMouse(undefined)
-                } else {
-                  const sessionId = getRpcSessionId(self)
-                  const view = getContainingView(self)
-                  const { feature } = (await session.rpcManager.call(
-                    sessionId,
-                    'CoreGetFeatureDetails',
-                    {
-                      featureId,
-                      sessionId,
-                      layoutId: view.id,
-                      rendererType: 'PileupRenderer',
-                    },
-                  )) as { feature: unknown }
-
-                  // check featureIdUnderMouse is still the same as the
-                  // feature.id that was returned e.g. that the user hasn't
-                  // moused over to a new position during the async operation
-                  // above
-                  // @ts-ignore
-                  if (self.featureIdUnderMouse === feature.uniqueId) {
-                    // @ts-ignore
-                    self.setFeatureUnderMouse(new SimpleFeature(feature))
-                  }
-                }
-              }
-            } catch (e) {
-              console.error(e)
-              session.notify(`${e}`, 'error')
-            }
-          }),
-        )
-      },
-
       /**
        * #action
        */
@@ -750,6 +699,58 @@ function stateModelFactory(configSchema: AnyConfigurationSchemaType) {
         },
       }
     })
+    .actions(self => ({
+      afterAttach() {
+        addDisposer(
+          self,
+          autorun(() => prepareTrack(self), { delay: 1000 }),
+        )
+
+        // autorun synchronizes featureUnderMouse with featureIdUnderMouse
+        // asynchronously. this is needed due to how we do not serialize all
+        // features from the BAM/CRAM over the rpc
+        addDisposer(
+          self,
+          autorun(async () => {
+            const session = getSession(self)
+            try {
+              const featureId = self.featureIdUnderMouse
+              if (self.featureUnderMouse?.id() !== featureId) {
+                if (!featureId) {
+                  self.setFeatureUnderMouse(undefined)
+                } else {
+                  const sessionId = getRpcSessionId(self)
+                  const view = getContainingView(self)
+                  const { feature } = (await session.rpcManager.call(
+                    sessionId,
+                    'CoreGetFeatureDetails',
+                    {
+                      featureId,
+                      sessionId,
+                      layoutId: view.id,
+                      rendererType: 'PileupRenderer',
+                    },
+                  )) as { feature: unknown }
+
+                  // check featureIdUnderMouse is still the same as the
+                  // feature.id that was returned e.g. that the user hasn't
+                  // moused over to a new position during the async operation
+                  // above
+                  // @ts-ignore
+                  if (self.featureIdUnderMouse === feature.uniqueId) {
+                    // @ts-ignore
+                    self.setFeatureUnderMouse(new SimpleFeature(feature))
+                  }
+                }
+              }
+            } catch (e) {
+              console.error(e)
+              session.notify(`${e}`, 'error')
+            }
+          }),
+        )
+      },
+    }))
 }
 
 export type LinearPileupDisplayStateModel = ReturnType<typeof stateModelFactory>
