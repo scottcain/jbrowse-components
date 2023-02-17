@@ -37,7 +37,7 @@ const Arcs = observer(function ({
   const view = getContainingView(model) as LGV
   return (
     <canvas
-      data-testid={`Arc-display-${model.drawn}`}
+      data-testid={`Arc-display`}
       ref={ref => {
         if (isAlive(model)) {
           model.setRef(ref)

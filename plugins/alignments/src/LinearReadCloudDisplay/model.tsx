@@ -8,6 +8,7 @@ import {
 } from '@jbrowse/core/configuration'
 import { getContainingView, getSession } from '@jbrowse/core/util'
 import { BaseLinearDisplay } from '@jbrowse/plugin-linear-genome-view'
+import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 // icons
 import PaletteIcon from '@mui/icons-material/Palette'
@@ -17,7 +18,6 @@ import FilterListIcon from '@mui/icons-material/ClearAll'
 import { FilterModel } from '../shared'
 import { fetchChains, ChainData } from '../shared/fetchChains'
 import drawFeats from './drawFeats'
-import { LinearGenomeViewModel } from '@jbrowse/plugin-linear-genome-view'
 
 // async
 const FilterByTagDlg = lazy(() => import('../shared/FilterByTag'))

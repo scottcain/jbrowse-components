@@ -35,7 +35,7 @@ const Cloud = observer(function ({
   const view = getContainingView(model) as LGV
   return (
     <canvas
-      data-testid={`ReadCloud-display-${model.drawn}`}
+      data-testid={`ReadCloud-display`}
       ref={ref => {
         if (isAlive(model)) {
           model.setRef(ref)
