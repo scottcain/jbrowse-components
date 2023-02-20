@@ -361,7 +361,6 @@ function stateModelFactory(configSchema: AnyConfigurationSchemaType) {
             />
           )
         } else {
-          // @ts-ignore
           const C2S = await import('canvas2svg')
           const ctx = new C2S.default(width, height)
           await drawFeats(self, ctx)
@@ -410,7 +409,9 @@ function stateModelFactory(configSchema: AnyConfigurationSchemaType) {
                 ctx.clearRect(0, 0, canvas.width, self.height * 2)
                 ctx.resetTransform()
                 ctx.scale(2, 2)
+                console.log('drawing feats')
                 await drawFeats(self, ctx)
+                console.log('done drawing feats')
                 self.setDrawn(true)
               } catch (e) {
                 console.error(e)

@@ -20,7 +20,8 @@ const useStyles = makeStyles()(theme => ({
     backgroundColor: theme.palette.action.disabledBackground,
     backgroundImage:
       'repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,.5) 5px, rgba(255,255,255,.5) 10px)',
-    height: '100%',
+    height: 20,
+    position: 'absolute',
     width: '100%',
     pointerEvents: 'none',
     textAlign: 'center',
@@ -43,7 +44,7 @@ const Cloud = observer(function ({
       }}
       style={{
         position: 'absolute',
-        left: -view.offsetPx + model.lastDrawnOffsetPx,
+        left: -view.offsetPx,
         width: view.dynamicBlocks.totalWidthPx,
         height: model.height,
       }}
@@ -65,7 +66,7 @@ export default observer(function ({
     <BlockMsg
       message={`${err}`}
       severity="error"
-      buttonText={'Reload'}
+      buttonText="Reload"
       action={model.reload}
     />
   ) : model.loading ? (
@@ -73,8 +74,6 @@ export default observer(function ({
       className={classes.loading}
       style={{
         width: view.dynamicBlocks.totalWidthPx,
-        height: 20,
-        position: 'absolute',
         left: Math.max(0, -view.offsetPx),
       }}
     >

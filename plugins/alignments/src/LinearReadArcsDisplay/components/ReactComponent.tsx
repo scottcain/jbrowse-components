@@ -21,10 +21,11 @@ const useStyles = makeStyles()(theme => {
       paddingLeft: '0.6em',
       backgroundColor: theme.palette.background.default,
       backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 5px, ${bg} 5px, ${bg} 10px)`,
-      height: '100%',
       width: '100%',
       pointerEvents: 'none',
       textAlign: 'center',
+      height: 20,
+      position: 'absolute',
     },
   }
 })
@@ -35,17 +36,19 @@ const Arcs = observer(function ({
   model: LinearReadArcsDisplayModel
 }) {
   const view = getContainingView(model) as LGV
+  console.log('re-rendering arcs')
   return (
     <canvas
       data-testid={`Arc-display`}
       ref={ref => {
         if (isAlive(model)) {
+          console.log('new arc setRef')
           model.setRef(ref)
         }
       }}
       style={{
         position: 'absolute',
-        left: -view.offsetPx + model.lastDrawnOffsetPx,
+        left: -view.offsetPx,
         width: view.dynamicBlocks.totalWidthPx,
         height: model.height,
       }}
@@ -60,8 +63,8 @@ export default observer(function ({
 }: {
   model: LinearReadArcsDisplayModel
 }) {
-  const view = getContainingView(model)
   const { classes } = useStyles()
+  const view = getContainingView(model)
   const err = model.error
   return err ? (
     <BlockMsg
@@ -75,8 +78,6 @@ export default observer(function ({
       className={classes.loading}
       style={{
         width: view.dynamicBlocks.totalWidthPx,
-        height: 20,
-        position: 'absolute',
         left: Math.max(0, -view.offsetPx),
       }}
     >
