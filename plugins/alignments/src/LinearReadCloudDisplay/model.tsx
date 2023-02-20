@@ -91,6 +91,7 @@ function stateModelFactory(configSchema: AnyConfigurationSchemaType) {
        */
       setRef(ref: HTMLCanvasElement | null) {
         self.ref = ref
+        self.drawn = false
       },
 
       setColorScheme(s: { type: string }) {

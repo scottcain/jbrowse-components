@@ -117,6 +117,7 @@ function stateModelFactory(configSchema: AnyConfigurationSchemaType) {
        * internal, a reference to a HTMLCanvas because we use a autorun to draw the canvas
        */
       setRef(ref: HTMLCanvasElement | null) {
+        self.drawn = false
         self.ref = ref
       },
 
@@ -409,9 +410,7 @@ function stateModelFactory(configSchema: AnyConfigurationSchemaType) {
                 ctx.clearRect(0, 0, canvas.width, self.height * 2)
                 ctx.resetTransform()
                 ctx.scale(2, 2)
-                console.log('drawing feats')
                 await drawFeats(self, ctx)
-                console.log('done drawing feats')
                 self.setDrawn(true)
               } catch (e) {
                 console.error(e)

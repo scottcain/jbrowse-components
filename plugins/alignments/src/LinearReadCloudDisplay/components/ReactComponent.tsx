@@ -1,32 +1,18 @@
 import React from 'react'
 import { isAlive } from 'mobx-state-tree'
 import { observer } from 'mobx-react'
-import { makeStyles } from 'tss-react/mui'
 import { getContainingView } from '@jbrowse/core/util'
 import { LoadingEllipses } from '@jbrowse/core/ui'
 import {
   BlockMsg,
   LinearGenomeViewModel,
 } from '@jbrowse/plugin-linear-genome-view'
+import useStyles from '../../shared/loadingStyles'
 
 // local
 import { LinearReadCloudDisplayModel } from '../model'
 
 type LGV = LinearGenomeViewModel
-
-const useStyles = makeStyles()(theme => ({
-  loading: {
-    paddingLeft: '0.6em',
-    backgroundColor: theme.palette.action.disabledBackground,
-    backgroundImage:
-      'repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,.5) 5px, rgba(255,255,255,.5) 10px)',
-    height: 20,
-    position: 'absolute',
-    width: '100%',
-    pointerEvents: 'none',
-    textAlign: 'center',
-  },
-}))
 
 const Cloud = observer(function ({
   model,
@@ -36,7 +22,7 @@ const Cloud = observer(function ({
   const view = getContainingView(model) as LGV
   return (
     <canvas
-      data-testid={`ReadCloud-display`}
+      data-testid="ReadCloud-display"
       ref={ref => {
         if (isAlive(model)) {
           model.setRef(ref)
@@ -45,7 +31,7 @@ const Cloud = observer(function ({
       style={{
         position: 'absolute',
         left: -view.offsetPx,
-        width: view.dynamicBlocks.totalWidthPx,
+        width: view.dynamicBlocks.totalWidthPx + model.lastDrawnOffsetPx,
         height: model.height,
       }}
       width={view.dynamicBlocks.totalWidthPx * 2}

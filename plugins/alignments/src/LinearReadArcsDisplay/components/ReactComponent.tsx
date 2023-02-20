@@ -1,6 +1,5 @@
 import React from 'react'
 import { isAlive } from 'mobx-state-tree'
-import { makeStyles } from 'tss-react/mui'
 import { observer } from 'mobx-react'
 import { getContainingView } from '@jbrowse/core/util'
 import { LoadingEllipses } from '@jbrowse/core/ui'
@@ -11,24 +10,9 @@ import {
 
 // local
 import { LinearReadArcsDisplayModel } from '../model'
+import useStyles from '../../shared/loadingStyles'
 
 type LGV = LinearGenomeViewModel
-
-const useStyles = makeStyles()(theme => {
-  const bg = theme.palette.action.disabledBackground
-  return {
-    loading: {
-      paddingLeft: '0.6em',
-      backgroundColor: theme.palette.background.default,
-      backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 5px, ${bg} 5px, ${bg} 10px)`,
-      width: '100%',
-      pointerEvents: 'none',
-      textAlign: 'center',
-      height: 20,
-      position: 'absolute',
-    },
-  }
-})
 
 const Arcs = observer(function ({
   model,
@@ -36,19 +20,17 @@ const Arcs = observer(function ({
   model: LinearReadArcsDisplayModel
 }) {
   const view = getContainingView(model) as LGV
-  console.log('re-rendering arcs')
   return (
     <canvas
-      data-testid={`Arc-display`}
+      data-testid="Arc-display"
       ref={ref => {
         if (isAlive(model)) {
-          console.log('new arc setRef')
           model.setRef(ref)
         }
       }}
       style={{
         position: 'absolute',
-        left: -view.offsetPx,
+        left: -view.offsetPx + model.lastDrawnOffsetPx,
         width: view.dynamicBlocks.totalWidthPx,
         height: model.height,
       }}
