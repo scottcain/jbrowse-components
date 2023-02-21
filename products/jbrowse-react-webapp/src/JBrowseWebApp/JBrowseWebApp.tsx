@@ -16,9 +16,11 @@ const useStyles = makeStyles()({
   },
 })
 
-const JBrowseWebApp = observer(function ({ viewState }: { viewState: any }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default observer(function ({ viewState }: { viewState: any }) {
   const { classes } = useStyles()
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const session = viewState?.session as any
   const theme = createJBrowseTheme(getConf(viewState.jbrowse, 'theme'))
 
@@ -32,5 +34,3 @@ const JBrowseWebApp = observer(function ({ viewState }: { viewState: any }) {
     </ThemeProvider>
   )
 })
-
-export default JBrowseWebApp

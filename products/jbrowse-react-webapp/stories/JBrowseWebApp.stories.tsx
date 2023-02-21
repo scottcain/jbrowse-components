@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* eslint-disable no-console,@typescript-eslint/no-non-null-assertion */
 import React, { useEffect, useState } from 'react'
 import { observer } from 'mobx-react'
 import { PluginRecord } from '@jbrowse/core/PluginLoader'
@@ -497,34 +497,36 @@ export const WithInlinePlugins = () => {
 }
 
 export const Hg38Exome = () => {
-  const assemblies = {
-    name: 'GRCh38',
-    sequence: {
-      type: 'ReferenceSequenceTrack',
-      trackId: 'GRCh38-ReferenceSequenceTrack',
-      adapter: {
-        type: 'BgzipFastaAdapter',
-        fastaLocation: {
-          uri: 'https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/fasta/GRCh38.fa.gz',
+  const assemblies = [
+    {
+      name: 'GRCh38',
+      sequence: {
+        type: 'ReferenceSequenceTrack',
+        trackId: 'GRCh38-ReferenceSequenceTrack',
+        adapter: {
+          type: 'BgzipFastaAdapter',
+          fastaLocation: {
+            uri: 'https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/fasta/GRCh38.fa.gz',
+          },
+          faiLocation: {
+            uri: 'https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/fasta/GRCh38.fa.gz.fai',
+          },
+          gziLocation: {
+            uri: 'https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/fasta/GRCh38.fa.gz.gzi',
+          },
         },
-        faiLocation: {
-          uri: 'https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/fasta/GRCh38.fa.gz.fai',
-        },
-        gziLocation: {
-          uri: 'https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/fasta/GRCh38.fa.gz.gzi',
+      },
+      aliases: ['hg38'],
+      refNameAliases: {
+        adapter: {
+          type: 'RefNameAliasAdapter',
+          location: {
+            uri: 'https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/hg38_aliases.txt',
+          },
         },
       },
     },
-    aliases: ['hg38'],
-    refNameAliases: {
-      adapter: {
-        type: 'RefNameAliasAdapter',
-        location: {
-          uri: 'https://s3.amazonaws.com/jbrowse.org/genomes/GRCh38/hg38_aliases.txt',
-        },
-      },
-    },
-  }
+  ]
 
   const tracks = [
     {
@@ -625,38 +627,40 @@ export const WithExternalPlugins = () => {
   }
 
   const state = createViewState({
-    assemblies: {
-      name: 'hg19',
-      aliases: ['GRCh37'],
-      sequence: {
-        type: 'ReferenceSequenceTrack',
-        trackId: 'Pd8Wh30ei9R',
-        adapter: {
-          type: 'BgzipFastaAdapter',
-          fastaLocation: {
-            uri: 'https://jbrowse.org/genomes/hg19/fasta/hg19.fa.gz',
-            locationType: 'UriLocation',
+    assemblies: [
+      {
+        name: 'hg19',
+        aliases: ['GRCh37'],
+        sequence: {
+          type: 'ReferenceSequenceTrack',
+          trackId: 'Pd8Wh30ei9R',
+          adapter: {
+            type: 'BgzipFastaAdapter',
+            fastaLocation: {
+              uri: 'https://jbrowse.org/genomes/hg19/fasta/hg19.fa.gz',
+              locationType: 'UriLocation',
+            },
+            faiLocation: {
+              uri: 'https://jbrowse.org/genomes/hg19/fasta/hg19.fa.gz.fai',
+              locationType: 'UriLocation',
+            },
+            gziLocation: {
+              uri: 'https://jbrowse.org/genomes/hg19/fasta/hg19.fa.gz.gzi',
+              locationType: 'UriLocation',
+            },
           },
-          faiLocation: {
-            uri: 'https://jbrowse.org/genomes/hg19/fasta/hg19.fa.gz.fai',
-            locationType: 'UriLocation',
-          },
-          gziLocation: {
-            uri: 'https://jbrowse.org/genomes/hg19/fasta/hg19.fa.gz.gzi',
-            locationType: 'UriLocation',
+        },
+        refNameAliases: {
+          adapter: {
+            type: 'RefNameAliasAdapter',
+            location: {
+              uri: 'https://s3.amazonaws.com/jbrowse.org/genomes/hg19/hg19_aliases.txt',
+              locationType: 'UriLocation',
+            },
           },
         },
       },
-      refNameAliases: {
-        adapter: {
-          type: 'RefNameAliasAdapter',
-          location: {
-            uri: 'https://s3.amazonaws.com/jbrowse.org/genomes/hg19/hg19_aliases.txt',
-            locationType: 'UriLocation',
-          },
-        },
-      },
-    },
+    ],
     plugins: plugins.map(p => p.plugin),
     tracks: [
       {

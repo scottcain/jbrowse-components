@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PluginConstructor } from '@jbrowse/core/Plugin'
-//import { autorun } from 'mobx'
+// import { autorun } from 'mobx'
 import { onPatch, IJsonPatch } from 'mobx-state-tree'
 import createModel from './createModel'
 
@@ -32,9 +33,7 @@ export default function createViewState(opts: ViewStateOptions) {
     configuration,
     aggregateTextSearchAdapters,
     plugins,
-    location,
     onChange,
-    disableAddTracks = false,
     makeWorkerInstance,
   } = opts
   const { model, pluginManager } = createModel(
