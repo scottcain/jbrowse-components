@@ -2,7 +2,7 @@ import React from 'react'
 import { observer } from 'mobx-react'
 import { IAnyStateTreeNode, getEnv } from 'mobx-state-tree'
 import { getSession } from '@jbrowse/core/util'
-import { Typography, Link } from '@mui/material'
+import { Paper, Typography, Link } from '@mui/material'
 import { makeStyles } from 'tss-react/mui'
 import PluginManager from '@jbrowse/core/PluginManager'
 
@@ -54,19 +54,16 @@ function About({ model }: { model: IAnyStateTreeNode }) {
           {plugins
             .filter(plugin => !corePlugins.includes(plugin.name))
             .map(plugin => {
-              const text = `${plugin.name} ${plugin.version || ''}`
+              const { url, name, version = '' } = plugin
+              const text = `${name} ${version || ''}`
               return (
                 <li key={plugin.name}>
                   {plugin.url ? (
-                    <Link
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      href={plugin.url}
-                    >
+                    <Link target="_blank" rel="noopener noreferrer" href={url}>
                       {text}
                     </Link>
                   ) : (
-                    text
+                    <Typography>{text}</Typography>
                   )}
                 </li>
               )
@@ -78,7 +75,9 @@ function About({ model }: { model: IAnyStateTreeNode }) {
             .filter(plugin => corePlugins.includes(plugin.name))
             .map(plugin => (
               <li key={plugin.name}>
-                {plugin.name} {plugin.version || ''}
+                <Typography>
+                  {plugin.name} {plugin.version || ''}
+                </Typography>
               </li>
             ))}
         </ul>
