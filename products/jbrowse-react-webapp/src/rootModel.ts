@@ -36,11 +36,11 @@ import RedoIcon from '@mui/icons-material/Redo'
 import { Cable } from '@jbrowse/core/ui/Icons'
 
 // other
-import makeWorkerInstance from './makeWorkerInstance'
 import corePlugins from './corePlugins'
 import jbrowseWebFactory from './jbrowseModel'
 import sessionModelFactory from './sessionModelFactory'
 import { filterSessionInPlace } from './util'
+
 import { AnyConfigurationModel } from '@jbrowse/core/configuration'
 
 export interface Menu {
@@ -56,6 +56,9 @@ export interface Menu {
 export default function RootModel(
   pluginManager: PluginManager,
   adminMode = false,
+  makeWorkerInstance: () => Worker = () => {
+    throw new Error('no makeWorkerInstance supplied')
+  },
 ) {
   const assemblyConfigSchema = assemblyConfigSchemaFactory(pluginManager)
   const Session = sessionModelFactory(pluginManager, assemblyConfigSchema)

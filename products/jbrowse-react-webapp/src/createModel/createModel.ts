@@ -12,11 +12,15 @@ export default function createModel(
     throw new Error('no makeWorkerInstance supplied')
   },
 ) {
-  const pluginManager = new PluginManager(
-    [...corePlugins, ...runtimePlugins].map(P => new P()),
-  )
+  const pluginManager = new PluginManager([
+    ...corePlugins.map(P => ({
+      plugin: new P(),
+      metadata: { isCore: true },
+    })),
+    ...runtimePlugins.map(P => new P()),
+  ])
   pluginManager.createPluggableElements()
-  const rootModel = createRootModel(pluginManager)
+  const rootModel = createRootModel(pluginManager, false, makeWorkerInstance)
   return { model: rootModel, pluginManager }
 }
 
