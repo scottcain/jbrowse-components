@@ -10,8 +10,6 @@ import {
 } from 'use-query-params'
 import { WindowHistoryAdapter } from 'use-query-params/adapters/window'
 import { LoadingEllipses, FatalErrorDialog } from '@jbrowse/core/ui'
-import '@fontsource/roboto'
-import 'requestidlecallback-polyfill'
 import shortid from 'shortid'
 import { doAnalytics } from '@jbrowse/core/util/analytics'
 
@@ -256,6 +254,7 @@ const Renderer = observer(
         } = loader
 
         if (ready) {
+          console.log({ corePlugins })
           // it is ready when a session has loaded and when there is no config
           // error Assuming that the query changes self.sessionError or
           // self.sessionSnapshot or self.blankSession
