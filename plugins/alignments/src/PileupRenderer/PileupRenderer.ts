@@ -743,7 +743,7 @@ export default class PileupRenderer extends BoxRendererType {
       default:
         if (defaultColor) {
           // avoid a readConfObject call here
-          ctx.fillStyle = '#ccc'
+          ctx.fillStyle = 'lightgrey'
         } else {
           ctx.fillStyle = readConfObject(config, 'color', { feature })
         }

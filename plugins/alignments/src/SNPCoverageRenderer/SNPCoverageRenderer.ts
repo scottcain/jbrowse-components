@@ -100,7 +100,7 @@ export default class SNPCoverageRenderer extends WiggleBaseRenderer {
       C: bases.C.main,
       G: bases.G.main,
       T: bases.T.main,
-      total: '#ccc',
+      total: 'lightgrey',
       insertion: 'purple',
       softclip: 'blue',
       hardclip: 'red',
@@ -144,7 +144,7 @@ export default class SNPCoverageRenderer extends WiggleBaseRenderer {
 
       const score = feature.get('score') as number
       const snpinfo = feature.get('snpinfo') as SNPInfo
-      const w = Math.max(rightPx - leftPx + fudgeFactor, 1)
+      const w = Math.max(rightPx - leftPx + fudgeFactor, 1.5)
       const totalScore = snpinfo.total
       const keys = Object.keys(snpinfo.cov).sort()
 
@@ -160,7 +160,7 @@ export default class SNPCoverageRenderer extends WiggleBaseRenderer {
         const height = toHeight(score)
         const bottom = toY(score) + height
         ctx.fillRect(
-          Math.floor(leftPx),
+          Math.round(leftPx),
           bottom - ((total + curr) / score) * height,
           w,
           (total / score) * height,
