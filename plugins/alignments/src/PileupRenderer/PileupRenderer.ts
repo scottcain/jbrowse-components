@@ -189,13 +189,10 @@ export default class PileupRenderer extends BoxRendererType {
         }
       }
     }
+    const s = feature.get('start') - expansionBefore
+    const e = feature.get('end') + expansionAfter
 
-    const [leftPx, rightPx] = bpSpanPx(
-      feature.get('start') - expansionBefore,
-      feature.get('end') + expansionAfter,
-      region,
-      bpPerPx,
-    )
+    const [leftPx, rightPx] = bpSpanPx(s, e, region, bpPerPx)
 
     if (displayMode === 'compact') {
       heightPx /= 3
@@ -207,13 +204,7 @@ export default class PileupRenderer extends BoxRendererType {
         }`,
       )
     }
-    const topPx = layout.addRect(
-      feature.id(),
-      feature.get('start') - expansionBefore,
-      feature.get('end') + expansionAfter,
-      heightPx,
-      feature,
-    )
+    const topPx = layout.addRect(feature.id(), s, e, heightPx, feature)
     if (topPx === null) {
       return null
     }
@@ -658,6 +649,7 @@ export default class PileupRenderer extends BoxRendererType {
     charWidth,
     charHeight,
     defaultColor,
+    theme,
     canvasWidth,
   }: {
     ctx: CanvasRenderingContext2D
@@ -669,9 +661,9 @@ export default class PileupRenderer extends BoxRendererType {
     charHeight: number
     defaultColor: boolean
     canvasWidth: number
+    theme: Theme
   }) {
     const { config, bpPerPx, regions, colorBy, colorTagMap = {} } = renderArgs
-
     const { tag = '', type: colorType = '' } = colorBy || {}
     const { feature } = feat
     const region = regions[0]
@@ -751,7 +743,7 @@ export default class PileupRenderer extends BoxRendererType {
       default:
         if (defaultColor) {
           // avoid a readConfObject call here
-          ctx.fillStyle = '#c8c8c8'
+          ctx.fillStyle = '#ccc'
         } else {
           ctx.fillStyle = readConfObject(config, 'color', { feature })
         }
@@ -825,6 +817,7 @@ export default class PileupRenderer extends BoxRendererType {
     canvasWidth,
     drawSNPsMuted,
     drawIndels = true,
+    theme,
   }: {
     ctx: CanvasRenderingContext2D
     feat: LayoutFeature
@@ -839,6 +832,7 @@ export default class PileupRenderer extends BoxRendererType {
     charWidth: number
     charHeight: number
     canvasWidth: number
+    theme: Theme
   }) {
     const { Color, bpPerPx, regions } = renderArgs
     const { heightPx, topPx, feature } = feat
@@ -875,7 +869,7 @@ export default class PileupRenderer extends BoxRendererType {
 
           fillRect(
             ctx,
-            leftPx,
+            Math.round(leftPx),
             topPx,
             widthPx,
             heightPx,
@@ -1165,6 +1159,7 @@ export default class PileupRenderer extends BoxRendererType {
         charWidth,
         charHeight,
         canvasWidth,
+        theme,
       })
       this.drawMismatches({
         ctx,
@@ -1180,6 +1175,7 @@ export default class PileupRenderer extends BoxRendererType {
         colorForBase,
         contrastForBase,
         canvasWidth,
+        theme,
       })
       if (showSoftClip) {
         this.drawSoftClipping({
