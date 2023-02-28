@@ -44,9 +44,6 @@ const useStyles = makeStyles()({
 
 type LGV = LinearGenomeViewModel
 
-/**
- * Fetches and returns a list features for a given list of regions
- */
 async function fetchSequence(
   model: LGV,
   regions: Region[],
@@ -69,7 +66,6 @@ async function fetchSequence(
     throw new Error(`assembly ${assemblyName} not found`)
   }
   const adapterConfig = getConf(assembly, ['sequence', 'adapter'])
-
   const sessionId = 'getSequence'
   return rpcManager.call(sessionId, 'CoreGetFeatures', {
     adapterConfig,
@@ -196,7 +192,6 @@ function SequenceDialog({
           </Container>
         ) : null}
         <TextField
-          data-testid="rubberband-sequence"
           variant="outlined"
           multiline
           minRows={5}
@@ -248,7 +243,6 @@ function SequenceDialog({
             setTimeout(() => setCopied(false), 500)
           }}
           disabled={loading || !!error || sequenceTooLarge}
-          color="primary"
           startIcon={<ContentCopyIcon />}
         >
           {copied ? 'Copied' : 'Copy to clipboard'}
@@ -263,7 +257,6 @@ function SequenceDialog({
             )
           }}
           disabled={loading || !!error}
-          color="primary"
           startIcon={<GetAppIcon />}
         >
           Download FASTA

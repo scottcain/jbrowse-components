@@ -40,7 +40,7 @@ import {
   Dotplot1DViewModel,
   DotplotHView,
   DotplotVView,
-} from './1dview'
+} from '../1dview'
 import { getBlockLabelKeysToHide, makeTicks } from './components/util'
 import { renderToSvg } from './svgcomponents/SVGDotplotView'
 import ExportSvgDlg from './components/ExportSvgDialog'
